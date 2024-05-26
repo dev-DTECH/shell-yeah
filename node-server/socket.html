@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket</title>
+</head>
+
+<body>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+        integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+        crossorigin="anonymous"></script>
+    <script>
+        let startTime = performance.now();
+        let tps = 0
+        const socket = io("http://localhost:3000", {
+            // WARNING: in that case, there is no fallback to long-polling
+            transports: ["websocket", "polling"] // or [ "websocket", "polling" ] (the order matters)
+        });
+        socket.on("message", (data) => {
+            console.log(data);
+        });
+        socket.on("sync", (data) => {
+            if (performance.now() - startTime > 1000) {
+                console.log("TPS: " + tps);
+                tps = 0;
+                startTime = performance.now();
+            }
+            else {
+                tps++;
+            }
+            console.log(data);
+        });
+        setInterval(() => {
+            const start = performance.now();
+
+            socket.emit("ping", () => {
+                const ping = performance.now() - start;
+                console.log("Ping: ", ping, "ms");
+            });
+        }, 1000);
+
+        function test() {
+            socket.emit("message", "Hello World")
+
+        }
+    </script>
+    <button onclick="test()">Hello</button>
+
+</body>
+
+</html>
