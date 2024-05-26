@@ -1,11 +1,14 @@
 import React, {createContext, useContext, useEffect, useState} from "react";
-import axiosConfig from "../../axiosConfig.ts";
 import {useOpenSnackbar} from "./SnackbarContext.tsx";
+import {jwtDecode} from "jwt-decode";
+import api, {unauthorizedApi} from "../../axiosConfig.ts";
 
 type user = {
+    exp: number;
     id: string,
     username: string
     avatar: string
+    fullName?: string
 }
 
 const AuthUserContext = createContext<null | user>(null)
@@ -32,32 +35,31 @@ export default function AuthContextProvider({children}: { children: React.ReactN
     const [user, setUser] = useState<null | user>(null)
     const openSnackbar = useOpenSnackbar()
     useEffect(() => {
-        console.log("AuthContextProvider useEffect")
 
-        axiosConfig.interceptors.request.use(
-            (config) => {
-                const accessToken = localStorage.getItem('accessToken'); // get stored access token
+        let accessToken = localStorage.getItem('accessToken')
 
-                if (accessToken) {
-                    config.headers.Authorization = `Bearer ${accessToken}`; // set in header
+        if (!accessToken)
+            return
+
+        const tokenUser = jwtDecode<user>(accessToken)
+        console.log(tokenUser)
+        setUser(tokenUser)
+        openSnackbar("Welcome back " + (tokenUser.fullName || tokenUser.username) + "👋")
+        api.interceptors.request.use(
+            async (config) => {
+                if (tokenUser.exp * 1000 < Date.now()) {
+                    const res = await unauthorizedApi.post('/user/refreshToken')
+                    const {newAccessToken} = res.data
+                    localStorage.setItem('accessToken', newAccessToken)
+                    accessToken = newAccessToken
                 }
+                config.headers.Authorization = `Bearer ${accessToken}`; // set in header
                 return config;
             },
             (error) => {
                 return Promise.reject(error);
             }
         );
-        if (localStorage.getItem('accessToken'))
-            axiosConfig.post("/user/refresh")
-                .then(res => {
-                    setUser(res.data.user)
-                    localStorage.setItem('accessToken', res.data.accessToken)
-                    // openSnackbar(res.data.message)
-                })
-                .catch(e =>
-                    openSnackbar("Token Refresh failed", "error", e.response.data.error)
-
-                )
     }, [])
 
     return (

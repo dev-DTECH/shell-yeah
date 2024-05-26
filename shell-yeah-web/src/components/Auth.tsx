@@ -2,7 +2,7 @@ import {ModalClose, ModalDialog} from "@mui/joy";
 import {Button, Link, DialogTitle, Stack, Modal, TextField, Typography} from "@mui/material";
 import {useRef, useState} from "react";
 import {useSetUser} from "../context/AuthContext.tsx";
-import api from "../../axiosConfig.ts";
+import api, {unauthorizedApi} from "../../axiosConfig.ts";
 import {useOpenSnackbar} from "../context/SnackbarContext.tsx";
 import {isAxiosError} from "axios";
 
@@ -29,7 +29,7 @@ function Auth({open, setOpen}: { open: boolean, setOpen: (open: boolean) => void
                         if (isLogin) {
                             // Login
                             try {
-                                const res = await api.post("/user/login", {
+                                const res = await unauthorizedApi.post("/user/login", {
                                     username: usernameRef.current?.value,
                                     password: passwordRef.current?.value
                                 })

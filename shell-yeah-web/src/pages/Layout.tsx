@@ -188,7 +188,7 @@ function Layout() {
                                 <Box sx={{flexGrow: 0}}>
                                     <Tooltip title="Open settings">
                                         <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-                                            <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg"/>
+                                            <Avatar alt={user.fullName || user.username} src="/static/images/avatar/2.jpg"/>
                                         </IconButton>
                                     </Tooltip>
                                     <Menu
@@ -210,8 +210,8 @@ function Layout() {
                                         <MenuItem key={"logout"} onClick={async () => {
                                             try {
                                                 const res = await api.post("/user/logout")
-                                                setUser(null)
                                                 localStorage.removeItem('accessToken')
+                                                setUser(null)
                                                 handleCloseUserMenu()
                                                 openSnackbar(res.data.message)
                                             } catch (e) {

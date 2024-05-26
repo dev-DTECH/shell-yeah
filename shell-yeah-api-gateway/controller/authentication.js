@@ -117,5 +117,6 @@ export const refreshToken = async (req, res) => {
 
 export const logout = async (req, res) => {
     await deleteRefreshToken(req.cookies.jwt)
+    res.clearCookie('jwt')
     res.json({message: "Logout successful"})
 }
