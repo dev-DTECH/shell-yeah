@@ -1,6 +1,7 @@
 import database from "../database.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import {deleteRefreshToken, generateAccessToken, generateRefreshToken} from "../utils/jwt.js";
 
 export const login = async (req, res) => {
     if (!req.body.username || !req.body.password) {
@@ -14,21 +15,20 @@ export const login = async (req, res) => {
         res.status(401).json({error: "Invalid username or password"})
         return
     }
-    const user = users[0]
-    const passwordMatch = await bcrypt.compare(password, user.password)
+    // const user = users[0]
+    const user = {
+        id: users[0].id,
+        username: users[0].username,
+        email: users[0].email
+    }
+    const passwordMatch = await bcrypt.compare(password, users[0].password)
     if (!passwordMatch) {
         res.status(401).json({error: "Invalid username or password"})
         return
     }
-    const accessToken = jwt.sign({
-        id: user.id,
-        username: user.username,
-        email: user.email
-    }, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1s'})
+    const accessToken = generateAccessToken(user)
 
-    const refreshToken = jwt.sign({
-        username: user.username,
-    }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
+    const refreshToken = await generateRefreshToken(user)
 
     res.cookie('jwt', refreshToken, {
         httpOnly: true,
@@ -82,24 +82,40 @@ export const register = async (req, res) => {
 }
 
 export const refreshToken = async (req, res) => {
-    const user = {
-        id: req.user.id,
-        username: req.user.username,
-        email: req.user.email
+    const token = req.cookies.jwt
+    if (!token) {
+        res.status(401).json({error: "Unauthorized User"})
+        return
     }
-    const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1d'})
-    const refreshToken = jwt.sign({
-        username: user.username,
-    }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1d' });
-
-    res.cookie('jwt', refreshToken, {
-        httpOnly: true,
-        sameSite: 'None', secure: true,
-        maxAge: 24 * 60 * 60 * 1000
-    });
-    res.json({user, accessToken, message: "Token refreshed"})
+    const [{length}] = await database.query("SELECT * FROM refresh_token WHERE token = ?", [token])
+    if (length == 0) {
+        res.status(403).json({error: "Invalid token"})
+        return
+    }
+    jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, async (err, user) => {
+        if (err) {
+            console.error(err)
+            res.status(403).json({error: "Invalid token"})
+            return
+        }
+        var userDTO = {
+            id: user.id,
+            username: user.username,
+            email: user.email
+        }
+        await deleteRefreshToken(token)
+        const newAccessToken = generateAccessToken(userDTO)
+        const newRefreshToken = await generateRefreshToken(userDTO)
+        res.cookie('jwt', newRefreshToken, {
+            httpOnly: true,
+            sameSite: 'None', secure: true,
+            maxAge: 24 * 60 * 60 * 1000
+        });
+        res.json({user: userDTO, newAccessToken, message: "Token refreshed"})
+    })
 }
 
 export const logout = async (req, res) => {
+    await deleteRefreshToken(req.cookies.jwt)
     res.json({message: "Logout successful"})
 }

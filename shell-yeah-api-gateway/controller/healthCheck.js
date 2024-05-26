@@ -4,7 +4,6 @@ const healthCheck = (req, res) => {
         message: "OK",
         timestamp: Date.now(),
         responseTime: process.hrtime()
-
     })
 }
 
