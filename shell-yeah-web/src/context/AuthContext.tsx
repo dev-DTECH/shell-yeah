@@ -32,35 +32,36 @@ export function useSetUser() {
 }
 
 export default function AuthContextProvider({children}: { children: React.ReactNode }) {
-    const [user, setUser] = useState<null | user>(null)
+    const accessToken = localStorage.getItem('accessToken')
+    const tokenUser = accessToken ? jwtDecode<user>(accessToken) : null
+
+    const [user, setUser] = useState<null | user>(tokenUser)
+
     const openSnackbar = useOpenSnackbar()
     useEffect(() => {
+        if (user)
+            openSnackbar("Welcome back " + (user.fullName || user.username) + "👋")
 
-        let accessToken = localStorage.getItem('accessToken')
-
-        if (!accessToken)
-            return
-
-        const tokenUser = jwtDecode<user>(accessToken)
-        console.log(tokenUser)
-        setUser(tokenUser)
-        openSnackbar("Welcome back " + (tokenUser.fullName || tokenUser.username) + "👋")
         api.interceptors.request.use(
             async (config) => {
-                if (tokenUser.exp * 1000 < Date.now()) {
+                if(!user) return config
+                console.log("User: ", user)
+                if ((user.exp * 1000 < (new Date).getTime())) {
+                    console.log("Token expired")
                     const res = await unauthorizedApi.post('/user/refreshToken')
                     const {newAccessToken} = res.data
+                    // setAccessToken(newAccessToken)
                     localStorage.setItem('accessToken', newAccessToken)
-                    accessToken = newAccessToken
                 }
-                config.headers.Authorization = `Bearer ${accessToken}`; // set in header
+                config.headers.Authorization = `Bearer ${localStorage.getItem('accessToken')}`; // set in header
                 return config;
             },
             (error) => {
                 return Promise.reject(error);
             }
         );
-    }, [])
+    }, [user])
+
 
     return (
         <AuthUserContext.Provider value={user}>

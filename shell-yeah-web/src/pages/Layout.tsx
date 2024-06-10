@@ -22,7 +22,6 @@ import {useOpenSnackbar} from "../context/SnackbarContext.tsx";
 import api from "../../axiosConfig.ts";
 
 const pages = ['news', 'about', 'store', 'play'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 
 function Layout() {
@@ -215,7 +214,7 @@ function Layout() {
                                                 handleCloseUserMenu()
                                                 openSnackbar(res.data.message)
                                             } catch (e) {
-                                                openSnackbar("Logout failed", "error", e.response.data.error)
+                                                openSnackbar("Logout failed", "error", e?.response?.data?.error || e.message)
                                                 return
                                             }
                                         }}>

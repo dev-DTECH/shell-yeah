@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useState} from "react";
+import React, {createContext, useCallback, useContext, useState} from "react";
 import {Alert, AlertTitle, Snackbar} from "@mui/material";
 
 type Severity = 'error' | 'info' | 'success' | 'warning'
@@ -29,12 +29,19 @@ export default function SnackbarContextProvider({children}: { children: React.Re
         setOpen(true)
     }
 
+    const handleClose = (_event: React.SyntheticEvent | Event, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+    };
+
     return (
         <SnackbarContext.Provider value={openSnackbar}>
             {children}
-            <Snackbar open={open} autoHideDuration={6000} onClose={() => setOpen(false)}>
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
                 <Alert
-                    onClose={() => setOpen(false)}
                     severity={severity}
                     variant="filled"
                     sx={{width: '100%'}}

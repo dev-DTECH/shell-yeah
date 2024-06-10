@@ -5,6 +5,15 @@ import {useSetUser} from "../context/AuthContext.tsx";
 import api, {unauthorizedApi} from "../../axiosConfig.ts";
 import {useOpenSnackbar} from "../context/SnackbarContext.tsx";
 import {isAxiosError} from "axios";
+import {jwtDecode} from "jwt-decode";
+
+type user = {
+    exp: number;
+    id: string,
+    username: string
+    avatar: string
+    fullName?: string
+}
 
 
 function Auth({open, setOpen}: { open: boolean, setOpen: (open: boolean) => void }) {
@@ -33,7 +42,7 @@ function Auth({open, setOpen}: { open: boolean, setOpen: (open: boolean) => void
                                     username: usernameRef.current?.value,
                                     password: passwordRef.current?.value
                                 })
-                                setUser(res.data.user)
+                                setUser(jwtDecode<user>(res.data.accessToken))
                                 localStorage.setItem('accessToken', res.data.accessToken)
                                 openSnackbar(res.data.message)
                             } catch (e) {
@@ -50,7 +59,7 @@ function Auth({open, setOpen}: { open: boolean, setOpen: (open: boolean) => void
                                     username: usernameRef.current?.value,
                                     password: passwordRef.current?.value
                                 })
-                                setUser(res.data.user)
+                                setUser(jwtDecode<user>(res.data.accessToken))
                                 localStorage.setItem('accessToken', res.data.accessToken)
                                 setIsLogin(true)
                                 openSnackbar(res.data.message)
