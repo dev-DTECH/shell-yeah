@@ -115,6 +115,10 @@ export const refreshToken = async (req, res) => {
     })
 }
 
+export const me = async (req, res) => {
+    res.json({user: req.user})
+}
+
 export const logout = async (req, res) => {
     await deleteRefreshToken(req.cookies.jwt)
     res.clearCookie('jwt')

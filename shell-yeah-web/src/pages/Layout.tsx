@@ -209,8 +209,7 @@ function Layout() {
                                         <MenuItem key={"logout"} onClick={async () => {
                                             try {
                                                 const res = await api.post("/user/logout")
-                                                localStorage.removeItem('accessToken')
-                                                setUser(null)
+                                                setUser(undefined)
                                                 handleCloseUserMenu()
                                                 openSnackbar(res.data.message)
                                             } catch (e) {

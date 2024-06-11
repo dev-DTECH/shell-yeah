@@ -1,11 +1,12 @@
 import {useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {useOpenSnackbar} from "../context/SnackbarContext.tsx";
+import ChatBox from "../components/ChatBox.tsx";
 
 function Arena() {
     const params = useParams()
     const openSnackbar = useOpenSnackbar()
-    const [isStarted, setIsStarted] = useState(false)
+    // const [isStarted, setIsStarted] = useState(false)
     const arenaId = params["arenaId"]
     useEffect(() => {
         console.log("Arena ID: ", arenaId)
@@ -13,7 +14,10 @@ function Arena() {
         openSnackbar(`Connected to arena "${arenaId}"`)
     }, [arenaId]);
     return (
+        <>
+            <ChatBox arenaId={arenaId}/>
         <h1>Arena: {params["arenaId"]}</h1>
+        </>
     )
 }
 

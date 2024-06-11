@@ -10,8 +10,14 @@ import userRouter from "./route/user.js";
 import healthCheck from "./controller/healthCheck.js";
 import cookieParser from "cookie-parser";
 import * as os from "os";
+import http from "node:http";
+import {Server} from "socket.io";
 
 const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server);
+
 app.use(express.json())
 app.use(cookieParser())
 
@@ -27,10 +33,30 @@ app.use(function(req, res, next) {
 app.use(`${BASE_URL}/user`, userRouter)
 app.use(`${BASE_URL}/healthcheck`, healthCheck)
 
+app.use(`${BASE_URL}/*`, (req, res) => {
+    res.status(404).json({message: "Not Found"})
+});
+
 app.use(BASE_URL, (req, res) => {
     res.status(200).json({message: "Shell Yeah - API Gateway"})
 });
 
-app.listen(3000, () => {
+// Socket
+io.on('connection', (socket) => {
+    console.log(`Client connected: ${socket.id}`);
+    socket.on("join_arena", async (arenaId) => {
+        socket.join(arenaId)
+    })
+    socket.on('disconnect', () => {
+        console.log(`Client disconnected: ${socket.id}`);
+    });
+    socket.on("message", (message) => {
+        console.log(`Received message from ${socket.id}: ${message}`);
+        socket.emit()
+    });
+});
+
+server.listen(3000, () => {
     console.log(`[Shell Yeah - API Gateway] Listening on port 3000 🚀 -> http://localhost:3000${BASE_URL}`);
 });
+

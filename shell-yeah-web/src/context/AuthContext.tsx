@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useState} from "react";
+import React, {createContext, useContext, useEffect, useLayoutEffect, useState} from "react";
 import {useOpenSnackbar} from "./SnackbarContext.tsx";
 import {jwtDecode} from "jwt-decode";
 import api, {unauthorizedApi} from "../../axiosConfig.ts";
@@ -11,8 +11,8 @@ type user = {
     fullName?: string
 }
 
-const AuthUserContext = createContext<null | user>(null)
-const AuthSetUserContext = createContext<React.Dispatch<React.SetStateAction<null | user>>>(null as unknown as React.Dispatch<React.SetStateAction<null | user>>)
+const AuthUserContext = createContext<user | undefined>(undefined)
+const AuthSetUserContext = createContext<React.Dispatch<React.SetStateAction<undefined | user>>>(undefined as unknown as React.Dispatch<React.SetStateAction<undefined | user>>)
 
 
 export function useUser() {
@@ -32,35 +32,52 @@ export function useSetUser() {
 }
 
 export default function AuthContextProvider({children}: { children: React.ReactNode }) {
-    const accessToken = localStorage.getItem('accessToken')
-    const tokenUser = accessToken ? jwtDecode<user>(accessToken) : null
+    const [accessToken, setAccessToken] = useState<string>()
 
-    const [user, setUser] = useState<null | user>(tokenUser)
+    const [user, setUser] = useState<user>()
+
+    async function refreshToken() {
+        const res = await unauthorizedApi.post('/user/refreshToken')
+        const {newAccessToken} = res.data
+        setAccessToken(newAccessToken)
+        return newAccessToken
+    }
 
     const openSnackbar = useOpenSnackbar()
-    useEffect(() => {
-        if (user)
-            openSnackbar("Welcome back " + (user.fullName || user.username) + "👋")
-
+    useLayoutEffect(() => {
         api.interceptors.request.use(
             async (config) => {
-                if(!user) return config
-                console.log("User: ", user)
-                if ((user.exp * 1000 < (new Date).getTime())) {
-                    console.log("Token expired")
-                    const res = await unauthorizedApi.post('/user/refreshToken')
-                    const {newAccessToken} = res.data
-                    // setAccessToken(newAccessToken)
-                    localStorage.setItem('accessToken', newAccessToken)
+                if (accessToken) {
+                    const tokenUser = jwtDecode<user>(accessToken)
+                    if (tokenUser.exp * 1000 < (new Date).getTime()) {
+                        console.log("Token expired, refreshing")
+                        const refreshedAccessToken = await refreshToken()
+                        config.headers.Authorization = `Bearer ${refreshedAccessToken}`; // set in header
+                        return config
+                    }
+                    config.headers.Authorization = `Bearer ${accessToken}`; // set in header
+                    return config
                 }
-                config.headers.Authorization = `Bearer ${localStorage.getItem('accessToken')}`; // set in header
-                return config;
+                console.log("No token, refreshing")
+                const refreshedAccessToken = await refreshToken()
+                config.headers.Authorization = `Bearer ${refreshedAccessToken}`; // set in header
+                return config
             },
             (error) => {
                 return Promise.reject(error);
             }
         );
-    }, [user])
+    }, [accessToken])
+
+    useLayoutEffect(() => {
+        if (user) {
+            openSnackbar(`Welcome back, ${user?.username}!`)
+            return
+        }
+        api.get('/user/me').then(res => {
+            setUser(res.data.user)
+        })
+    }, [user]);
 
 
     return (

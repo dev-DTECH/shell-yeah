@@ -160,6 +160,9 @@ async function main() {
         socket.on("message", (message) => {
             console.log(`Received message from ${socket.id}: ${message}`);
         });
+        socket.on("joinArena", async (arenaId) => {
+            socket.join(arenaId)
+        })
         socket.on("move", async (data) => {
             // console.log(data)
             players = players.map(player => {
