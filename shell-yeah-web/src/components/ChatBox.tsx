@@ -1,50 +1,116 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {io, Socket} from "socket.io-client";
+import {useOpenSnackbar} from "../context/SnackbarContext.tsx";
+import {useUser} from "../context/AuthContext.tsx";
+import {List, ListItem, ListItemAvatar, ListItemText, TextField} from "@mui/material";
+import {SendRounded} from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton";
+import Box from "@mui/material/Box";
+import Avatar from "@mui/material/Avatar";
 
-function ChatBox({arenaId}) {
+type Message =
+    {
+        user: {
+            id: string,
+            username: string
+            avatar: string
+            fullName?: string
+        }
+        message: string
+        sentAt: Date
+    }
+
+function ChatBox({arenaId}: { arenaId: string }) {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [message, setMessage] = useState<string>("");
     const [socket, setSocket] = useState<Socket | null>(null);
+    const openSnackbar = useOpenSnackbar()
+    const user = useUser()
+    const messageRef = useRef<HTMLInputElement>()
+    const messagesEndRef = useRef<HTMLDivElement>()
 
     useEffect(() => {
+        if (!user) return
         const socket = io("localhost:3000", {
             // WARNING: in that case, there is no fallback to long-polling
             transports: ["websocket", "polling"] // or [ "websocket", "polling" ] (the order matters)
         });
         setSocket(socket);
-        socket.emit("joinArena", arenaId);
+        socket.emit("join_arena", arenaId);
 
-        socket.on("chat", (data: string) => {
-            setMessages([...messages, data]);
+        socket.on("message", (data: Message) => {
+            setMessages((messages) => [...messages, data]);
+        });
+        socket.io.on("reconnect", () => {
+            socket.emit("join_arena", arenaId);
+            openSnackbar("Reconnected successfully!")
+        });
+        socket.io.on("reconnect_attempt", (attempt) => {
+            openSnackbar(`Reconnecting... ${attempt}`, "warning")
+        });
+        socket.io.on("reconnect_failed", () => {
+            openSnackbar("Reconnection Failed!", "error")
         });
         return () => {
             socket.close()
         }
-    }, []);
+    }, [arenaId, user]);
 
-    const sendMessage = () => {
-        if (socket) {
-            socket.emit("message", message);
-            setMessage("");
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [messages]);
+
+    const sendMessage = (e: { preventDefault: () => void; }) => {
+        e.preventDefault()
+        if (socket && messageRef.current) {
+            socket.emit("message", {
+                user,
+                message: messageRef.current.value,
+                sentAt: new Date()
+            });
+            messageRef.current.value = ""
         }
     };
 
     return (
-        <div className="chat-box">
-            <div className="messages">
-                {messages.map((message, index) => (
-                    <div key={index} className="message">
-                        {message}
-                    </div>
-                ))}
-            </div>
-            <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-            />
-            <button onClick={sendMessage}>Send</button>
-        </div>
+        <Box sx={{position: "fixed", bottom: 0}}>
+            <List
+                  sx={{width: '100%', maxWidth: 360, bgcolor: 'grey', maxHeight: 500, overflowY: "scroll"}}>
+                {
+                    messages.map((message, index) =>
+                        <ListItem key={index}>
+                            <ListItemAvatar>
+                                <Avatar src={message.user?.avatar}/>
+                            </ListItemAvatar>
+                            <ListItemText primary={message.user?.username} secondary={message.message}/>
+                        </ListItem>
+                    )
+                }
+                <div ref={messagesEndRef}/>
+            </List>
+            <form onSubmit={sendMessage}>
+                <TextField label="Type here" variant="filled" required
+                           inputRef={messageRef}/>
+                <IconButton type={"submit"} color="primary" aria-label="Send Message">
+                    <SendRounded/>
+                </IconButton>
+            </form>
+        </Box>
+
+        // <div className="chat-box">
+        //     <div className="messages">
+        //         {messages.map((message, index) => (
+        //             <div key={index} className="message">
+        //                 {message}
+        //             </div>
+        //         ))}
+        //     </div>
+        //     <input
+        //         type="text"
+        //         value={message}
+        //         onChange={(e) => setMessage(e.target.value)}
+        //     />
+        //     <button onClick={sendMessage}>Send</button>
+        // </div>
     );
 }
 

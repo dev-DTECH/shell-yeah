@@ -23,7 +23,7 @@ app.use(cookieParser())
 
 const BASE_URL = "/api/v1"
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header("Access-Control-Allow-Origin", "http://localhost:5173");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -50,9 +50,13 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log(`Client disconnected: ${socket.id}`);
     });
-    socket.on("message", (message) => {
-        console.log(`Received message from ${socket.id}: ${message}`);
-        socket.emit()
+    socket.on("message", (data) => {
+        console.log(`Received message from ${socket.id}: ${data.message}`);
+        const rooms = socket.rooms
+        rooms.delete(socket.id)
+        const arenaId = Array.from(rooms)[0]
+        console.log(`[${arenaId}] [${data.user.username}] : ${data.message}`)
+        io.to(arenaId).emit('message', data);
     });
 });
 
