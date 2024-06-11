@@ -20,6 +20,7 @@ import Auth from "../components/Auth.tsx";
 import {useSetUser, useUser} from "../context/AuthContext.tsx";
 import {useOpenSnackbar} from "../context/SnackbarContext.tsx";
 import api from "../../axiosConfig.ts";
+import {isAxiosError} from "axios";
 
 const pages = ['news', 'about', 'store', 'play'];
 
@@ -187,7 +188,8 @@ function Layout() {
                                 <Box sx={{flexGrow: 0}}>
                                     <Tooltip title="Open settings">
                                         <IconButton onClick={handleOpenUserMenu} sx={{p: 0}}>
-                                            <Avatar alt={user.fullName || user.username} src="/static/images/avatar/2.jpg"/>
+                                            <Avatar alt={user.fullName || user.username}
+                                                    src="/static/images/avatar/2.jpg"/>
                                         </IconButton>
                                     </Tooltip>
                                     <Menu
@@ -213,7 +215,8 @@ function Layout() {
                                                 handleCloseUserMenu()
                                                 openSnackbar(res.data.message)
                                             } catch (e) {
-                                                openSnackbar("Logout failed", "error", e?.response?.data?.error || e.message)
+                                                if (isAxiosError(e))
+                                                    openSnackbar("Logout failed", "error", e?.response?.data?.error || e.message)
                                                 return
                                             }
                                         }}>

@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useLayoutEffect, useState} from "react";
+import React, {createContext, useContext, useLayoutEffect, useState} from "react";
 import {useOpenSnackbar} from "./SnackbarContext.tsx";
 import {jwtDecode} from "jwt-decode";
 import api, {unauthorizedApi} from "../../axiosConfig.ts";
