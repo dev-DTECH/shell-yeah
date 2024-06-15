@@ -12,11 +12,20 @@ type user = {
 }
 
 const AuthUserContext = createContext<user | undefined>(undefined)
+const AuthAccessTokenContext = createContext<string | undefined>(undefined)
 const AuthSetUserContext = createContext<React.Dispatch<React.SetStateAction<undefined | user>>>(undefined as unknown as React.Dispatch<React.SetStateAction<undefined | user>>)
 
 
 export function useUser() {
     const context = useContext(AuthUserContext)
+    // if (!context)
+    //     throw new Error("useUser must be used within an AuthContextProvider")
+
+    return context
+}
+
+export function useAccessToken() {
+    const context = useContext(AuthAccessTokenContext)
     // if (!context)
     //     throw new Error("useUser must be used within an AuthContextProvider")
 
@@ -83,7 +92,9 @@ export default function AuthContextProvider({children}: { children: React.ReactN
     return (
         <AuthUserContext.Provider value={user}>
             <AuthSetUserContext.Provider value={setUser}>
-                {children}
+                <AuthAccessTokenContext.Provider value={accessToken}>
+                    {children}
+                </AuthAccessTokenContext.Provider>
             </AuthSetUserContext.Provider>
         </AuthUserContext.Provider>
     )

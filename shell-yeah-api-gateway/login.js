@@ -42,6 +42,8 @@ app.use(BASE_URL, (req, res) => {
 });
 
 // Socket
+// io.engine.use(authorizeToken)
+
 io.on('connection', (socket) => {
     console.log(`Client connected: ${socket.id}`);
     socket.on("join_arena", async (arenaId) => {

@@ -1,9 +1,9 @@
 import {useEffect, useRef, useState} from "react";
 import {io, Socket} from "socket.io-client";
 import {useOpenSnackbar} from "../context/SnackbarContext.tsx";
-import {useUser} from "../context/AuthContext.tsx";
+import {useAccessToken, useUser} from "../context/AuthContext.tsx";
 import {List, ListItem, ListItemAvatar, ListItemText, TextField} from "@mui/material";
-import {SendRounded} from "@mui/icons-material";
+import {KeyboardArrowDown, SendRounded} from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
@@ -26,13 +26,18 @@ function ChatBox({arenaId}: { arenaId: string }) {
     const openSnackbar = useOpenSnackbar()
     const user = useUser()
     const messageRef = useRef<HTMLInputElement>()
-    const messagesEndRef = useRef<HTMLDivElement>()
+    const messagesEndRef = useRef<HTMLDivElement>(null)
+    const accessToken = useAccessToken()
+    const [isExpanded, setIsExpanded] = useState(false)
 
     useEffect(() => {
         if (!user) return
         const socket = io("localhost:3000", {
             // WARNING: in that case, there is no fallback to long-polling
-            transports: ["websocket", "polling"] // or [ "websocket", "polling" ] (the order matters)
+            transports: ["websocket", "polling"], // or [ "websocket", "polling" ] (the order matters)
+            extraHeaders: {
+                Authorization: `Bearer ${accessToken}`
+            }
         });
         setSocket(socket);
         socket.emit("join_arena", arenaId);
@@ -56,7 +61,7 @@ function ChatBox({arenaId}: { arenaId: string }) {
     }, [arenaId, user]);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        messagesEndRef.current?.scrollIntoView({behavior: 'smooth'})
     }, [messages]);
 
     const sendMessage = (e: { preventDefault: () => void; }) => {
@@ -74,7 +79,15 @@ function ChatBox({arenaId}: { arenaId: string }) {
     return (
         <Box sx={{position: "fixed", bottom: 0}}>
             <List
-                  sx={{width: '100%', maxWidth: 360, bgcolor: 'grey', maxHeight: 500, overflowY: "scroll"}}>
+                sx={{
+                    width: '100%',
+                    maxWidth: 360,
+                    bgcolor: 'grey',
+                    height: isExpanded ? 500 : 0,
+                    // padding: isExpanded ? 8: null,
+                    overflowY: isExpanded ? "scroll" : "hidden",
+                    transition: "height 0.1s ease-in-out"
+                }}>
                 {
                     messages.map((message, index) =>
                         <ListItem key={index}>
@@ -88,11 +101,18 @@ function ChatBox({arenaId}: { arenaId: string }) {
                 <div ref={messagesEndRef}/>
             </List>
             <form onSubmit={sendMessage}>
-                <TextField label="Type here" variant="filled" required
-                           inputRef={messageRef}/>
-                <IconButton type={"submit"} color="primary" aria-label="Send Message">
-                    <SendRounded/>
-                </IconButton>
+
+                <Box sx={{display: "flex", borderRadius: 5}}>
+                    <IconButton color="primary" aria-label="Expand/Collapse chat"
+                                onClick={() => setIsExpanded(isExpanded => !isExpanded)}>
+                        <KeyboardArrowDown sx={{rotate: isExpanded ? 0 : "180deg", transition: "rotate 0.1s ease-in-out"}}/>
+                    </IconButton>
+                    <TextField label="Type here" variant="filled" required
+                               inputRef={messageRef}/>
+                    <IconButton type={"submit"} color="primary" aria-label="Send Message">
+                        <SendRounded/>
+                    </IconButton>
+                </Box>
             </form>
         </Box>
 

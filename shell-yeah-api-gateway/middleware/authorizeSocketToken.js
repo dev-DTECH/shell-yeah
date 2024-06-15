@@ -2,11 +2,11 @@ import {configDotenv} from "dotenv"
 import jwt from "jsonwebtoken"
 
 configDotenv()
-export default function authorizeToken(req, res, next) {
+export default function authorizeSocketToken(req, res, next) {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
     console.log(token)
-    if (token == null) return res.status(401).json({error: "Unauthorized User"})
+    if (token == null) return next(new Error("Unauthorized User"))
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         if (err instanceof jwt.TokenExpiredError)
             return res.status(403).json({error: "Token expired", isExpired: true})
