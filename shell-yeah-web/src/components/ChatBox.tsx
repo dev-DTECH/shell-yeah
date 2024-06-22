@@ -7,6 +7,7 @@ import {KeyboardArrowDown, SendRounded} from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
 
 type Message =
     {
@@ -77,13 +78,21 @@ function ChatBox({arenaId}: { arenaId: string }) {
     };
 
     return (
-        <Box sx={{position: "fixed", bottom: 0}}>
+        <Box sx={{
+            position: "fixed",
+            bottom: 0,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+            boxShadow: "0px 0px 6px #B2B2B2",
+            overflow: "hidden",
+        }}>
             <List
                 sx={{
                     width: '100%',
                     maxWidth: 360,
                     bgcolor: 'grey',
-                    height: isExpanded ? 500 : 0,
+                    height: 500,
+                    display: isExpanded ? "block" : "none",
                     // padding: isExpanded ? 8: null,
                     overflowY: isExpanded ? "scroll" : "hidden",
                     transition: "height 0.1s ease-in-out"
@@ -102,16 +111,24 @@ function ChatBox({arenaId}: { arenaId: string }) {
             </List>
             <form onSubmit={sendMessage}>
 
-                <Box sx={{display: "flex", borderRadius: 5}}>
+                <Box sx={{display: "flex"}}>
                     <IconButton color="primary" aria-label="Expand/Collapse chat"
                                 onClick={() => setIsExpanded(isExpanded => !isExpanded)}>
-                        <KeyboardArrowDown sx={{rotate: isExpanded ? 0 : "180deg", transition: "rotate 0.1s ease-in-out"}}/>
+                        <KeyboardArrowDown
+                            sx={{rotate: isExpanded ? 0 : "180deg", transition: "rotate 0.1s ease-in-out"}}/>
                     </IconButton>
-                    <TextField label="Type here" variant="filled" required
-                               inputRef={messageRef}/>
-                    <IconButton type={"submit"} color="primary" aria-label="Send Message">
-                        <SendRounded/>
-                    </IconButton>
+                    {
+                        isExpanded ?
+                            <>
+                                <TextField autoFocus={isExpanded} label="Type here" variant="filled" required
+                                           inputRef={messageRef}/>
+                                <IconButton type={"submit"} color="primary" aria-label="Send Message">
+                                    <SendRounded/>
+                                </IconButton>
+                            </>
+                            :
+                            <Button onClick={() => setIsExpanded(true)}>Expand Chat</Button>
+                    }
                 </Box>
             </form>
         </Box>

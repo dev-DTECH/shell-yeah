@@ -50,7 +50,7 @@ function Layout() {
 
     return (
         <>
-            <AppBar position="static">
+            <AppBar position="sticky">
                 <Container maxWidth="xl">
                     <Toolbar disableGutters>
                         <AdbIcon sx={{display: {xs: 'none', md: 'flex'}, mr: 1}}/>
@@ -244,7 +244,9 @@ function Layout() {
                 </Container>
                 <Auth open={openAuthModal} setOpen={setOpenAuthModal}/>
             </AppBar>
-            <Outlet/>
+            <div className={"page"}>
+                <Outlet/>
+            </div>
         </>
     );
 }
