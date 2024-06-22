@@ -8,6 +8,7 @@ import {Card, CardActions, CardContent, CardMedia} from "@mui/material";
 import {Share} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import TankAssets from "../components/TankAssets.ts";
+import TankImage from "../components/TankImage.tsx";
 
 function Arena() {
     const params = useParams()
@@ -15,7 +16,6 @@ function Arena() {
     // const [isStarted, setIsStarted] = useState(false)
     const [hull, setHull] = useState("churchill")
     const [turret, setTurret] = useState("churchill")
-    const [turretRotation, setTurretRotation] = useState(0)
 
     const arenaId = params["arenaId"] || "public"
     useEffect(() => {
@@ -24,19 +24,7 @@ function Arena() {
         openSnackbar(`Connected to arena "${arenaId}"`)
     }, [arenaId]);
 
-    useEffect(() => {
-        document.addEventListener("mousemove", (e) => {
-            const turretEle = document.querySelector("img[title='tank turret']")
 
-            const x = e.clientX
-            const y = e.clientY
-            const centerX = turretEle.getBoundingClientRect().x + 70
-            const centerY = turretEle.getBoundingClientRect().y + 70
-            const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI + 90
-
-            setTurretRotation(angle)
-        })
-    }, []);
 
     return (
         <>
@@ -55,20 +43,21 @@ function Arena() {
                     {/*    image="/"*/}
                     {/*    title="green iguana"*/}
                     {/*/>*/}
-                    <Box sx={{display: "flex", placeContent: "center"}}>
-                        <Box sx={{position: "relative"}}>
-                            <img
-                                style={{height: 140, position: "relative"}}
-                                src={TankAssets[hull].hull}
-                                title="tank hull"
-                            />
-                            <img
-                                style={{height: 140, position: "absolute", top: 0, left: 0, rotate: `${turretRotation}deg`}}
-                                src={TankAssets[hull].turret}
-                                title="tank turret"
-                            />
-                        </Box>
-                    </Box>
+                    {/*<Box sx={{display: "flex", placeContent: "center"}}>*/}
+                    {/*    <Box sx={{position: "relative"}}>*/}
+                    {/*        <img*/}
+                    {/*            style={{height: 140, position: "relative"}}*/}
+                    {/*            src={TankAssets[hull].hull}*/}
+                    {/*            title="tank hull"*/}
+                    {/*        />*/}
+                    {/*        <img*/}
+                    {/*            style={{height: 140, position: "absolute", top: 0, left: 0, rotate: `${turretRotation}deg`}}*/}
+                    {/*            src={TankAssets[hull].turret}*/}
+                    {/*            title="tank turret"*/}
+                    {/*        />*/}
+                    {/*    </Box>*/}
+                    {/*</Box>*/}
+                    <TankImage turret={turret} hull={hull}/>
 
 
                     <CardContent>
