@@ -33,31 +33,36 @@ function ChatBox({arenaId}: { arenaId: string }) {
 
     useEffect(() => {
         if (!user) return
-        const socket = io("localhost:3000", {
-            // WARNING: in that case, there is no fallback to long-polling
-            transports: ["websocket", "polling"], // or [ "websocket", "polling" ] (the order matters)
-            extraHeaders: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        });
-        setSocket(socket);
-        socket.emit("join_arena", arenaId);
-
-        socket.on("message", (data: Message) => {
-            setMessages((messages) => [...messages, data]);
-        });
-        socket.io.on("reconnect", () => {
+        const timeout = setTimeout(() => {
+            const socket = io("localhost:3000", {
+                // WARNING: in that case, there is no fallback to long-polling
+                transports: ["websocket", "polling"], // or [ "websocket", "polling" ] (the order matters)
+                extraHeaders: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+            setSocket(socket);
             socket.emit("join_arena", arenaId);
-            openSnackbar("Reconnected successfully!")
-        });
-        socket.io.on("reconnect_attempt", (attempt) => {
-            openSnackbar(`Reconnecting... ${attempt}`, "warning")
-        });
-        socket.io.on("reconnect_failed", () => {
-            openSnackbar("Reconnection Failed!", "error")
-        });
+
+            socket.on("message", (data: Message) => {
+                setMessages((messages) => [...messages, data]);
+            });
+            socket.io.on("reconnect", () => {
+                socket.emit("join_arena", arenaId);
+                openSnackbar("Reconnected successfully!")
+            });
+            socket.io.on("reconnect_attempt", (attempt) => {
+                openSnackbar(`Reconnecting... ${attempt}`, "warning")
+            });
+            socket.io.on("reconnect_failed", () => {
+                openSnackbar("Reconnection Failed!", "error")
+            });
+        }, 1000)
+
         return () => {
-            socket.close()
+            clearTimeout(timeout)
+            if (socket)
+                socket.close()
         }
     }, [arenaId, user]);
 
