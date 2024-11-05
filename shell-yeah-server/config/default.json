@@ -1,17 +1,18 @@
 {
-    "tps": 60,
+    "tps": 2,
     "debug": {
         "showTPS": false
 
     },
     "player": {
         "speed": 0.5,
-        "rotationSpeed": 0.01
+        "rotationSpeed": 0.01,
+        "viewDistance": 2000
     },
     "controls": {
-        "UP": ["w", "ArrowUp"],
-        "DOWN": ["s", "ArrowDown"],
-        "LEFT": ["a", "ArrowLeft"],
-        "RIGHT": ["d", "ArrowRight"]
+        "up": ["w", "ArrowUp"],
+        "down": ["s", "ArrowDown"],
+        "left": ["a", "ArrowLeft"],
+        "right": ["d", "ArrowRight"]
     }
 }

@@ -1,19 +1,26 @@
-// const app = require('express')();
-// const bcrypt = require('bcrypt');
+import {config} from "dotenv";
+
+config()
+
+
 import express from 'express';
-import bcrypt from 'bcrypt';
-import mysql from 'mysql2/promise';
-import authorizeToken from './src/middleware/authorizeToken.js';
-import jwt from 'jsonwebtoken';
-import database from "./src/database";
-import userRouter from "./src/route/user.js";
-import healthCheck from "./src/controller/healthCheck.js";
+import userRouter from "./route/user.js";
+import healthCheck from "./controller/healthCheck.js";
 import cookieParser from "cookie-parser";
 import * as os from "os";
 import http from "node:http";
 import {Server} from "socket.io";
-import tankRouter from "./src/route/tank.js";
-import {config} from "dotenv";
+import tankRouter from "./route/tank.js";
+import * as path from "path";
+import onPlayerJoin from "./events/onPlayerJoin";
+import onDisconnect from "./events/onDisconnect";
+import registerEvents from "./events";
+import gameloop from "./service/gameloop";
+import {createArena} from "./service/arena";
+import redisClient from "./config/redis";
+import authorizeSocketToken from "./middleware/authorizeSocketToken";
+
+const sockets = {}
 
 const app = express();
 const server = http.createServer(app);
@@ -45,30 +52,30 @@ app.use(BASE_URL, (req, res) => {
     res.status(200).json({message: "Shell Yeah - API Gateway"})
 });
 
-// Socket
-// io.engine.use(authorizeToken)
+app.use(`/assets`, express.static(path.join(__dirname, '../assets')))
 
+// Socket
+io.use(authorizeSocketToken)
 io.on('connection', (socket) => {
+    sockets[socket.id] = socket
     console.log(`Client connected: ${socket.id}`);
-    socket.on("join_arena", async (arenaId) => {
-        socket.join(arenaId)
-    })
-    socket.on('disconnect', () => {
+    registerEvents(socket, io)
+    socket.on("ping", (callback) => {
+        callback();
+    });
+    socket.on('disconnect', async () => {
+        delete sockets[socket.id]
+        await onDisconnect(socket)
         console.log(`Client disconnected: ${socket.id}`);
-    });
-    socket.on("message", (data) => {
-        console.log(`Received message from ${socket.id}: ${data.message}`);
-        const rooms = socket.rooms
-        rooms.delete(socket.id)
-        const arenaId = Array.from(rooms)[0]
-        console.log(`[${arenaId}] [${data.user.username}] : ${data.message}`)
-        io.to(arenaId).emit('message', data);
-    });
+    })
 });
 
-app.use(`/assets`, express.static('assets'))
+// Game Loop
+gameloop(io)
 
-server.listen(3000, () => {
+server.listen(3000, async () => {
+    await redisClient.flushDb()
+    await createArena("public")
     console.log(`[Shell Yeah - API Gateway] Listening on port 3000 🚀 -> http://localhost:3000${BASE_URL}`);
 });
 

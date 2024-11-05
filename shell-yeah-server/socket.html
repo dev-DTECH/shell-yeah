@@ -18,10 +18,19 @@
             // WARNING: in that case, there is no fallback to long-polling
             transports: ["websocket", "polling"] // or [ "websocket", "polling" ] (the order matters)
         });
+        socket.on("connect", () => {
+            console.log("Connected");
+            socket.emit("arena_join", {
+                arenaId: "public"
+            })
+        });
+
         socket.on("message", (data) => {
             console.log(data);
         });
         socket.on("sync", (data) => {
+            // console.log(data)
+            // console.table(data.entities);
             if (performance.now() - startTime > 1000) {
                 console.log("TPS: " + tps);
                 tps = 0;
@@ -30,7 +39,6 @@
             else {
                 tps++;
             }
-            console.log(data);
         });
         setInterval(() => {
             const start = performance.now();
@@ -46,6 +54,7 @@
 
         }
     </script>
+    <button onclick="test()">Hello</button>
     <button onclick="test()">Hello</button>
 
 </body>

@@ -1,4 +1,4 @@
-import database from "../database.js";
+import database from "../database";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {deleteRefreshToken, generateAccessToken, generateRefreshToken} from "../utils/jwt.js";

@@ -11,9 +11,11 @@ type user = {
     fullName?: string
 }
 
+type SetUserParams = user & { accessToken?: string }
+
 const AuthUserContext = createContext<user | undefined>(undefined)
 const AuthAccessTokenContext = createContext<string | undefined>(undefined)
-const AuthSetUserContext = createContext<React.Dispatch<React.SetStateAction<undefined | user>>>(undefined as unknown as React.Dispatch<React.SetStateAction<undefined | user>>)
+const AuthSetUserContext = createContext<((user: SetUserParams) => void) | undefined>(undefined)
 
 
 export function useUser() {
@@ -45,10 +47,13 @@ export default function AuthContextProvider({children}: { children: React.ReactN
 
     const [user, setUser] = useState<user>()
 
+
     async function refreshToken() {
         const res = await unauthorizedApi.post('/user/refreshToken')
         const {newAccessToken} = res.data
         setAccessToken(newAccessToken)
+
+        console.log("setAccessToken")
         return newAccessToken
     }
 
@@ -91,7 +96,11 @@ export default function AuthContextProvider({children}: { children: React.ReactN
 
     return (
         <AuthUserContext.Provider value={user}>
-            <AuthSetUserContext.Provider value={setUser}>
+            <AuthSetUserContext.Provider value={(user) => {
+                setAccessToken(user?.accessToken)
+                delete user?.accessToken
+                setUser(user)
+            }}>
                 <AuthAccessTokenContext.Provider value={accessToken}>
                     {children}
                 </AuthAccessTokenContext.Provider>

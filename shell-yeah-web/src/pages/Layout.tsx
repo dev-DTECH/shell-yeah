@@ -244,9 +244,12 @@ function Layout() {
                 </Container>
                 <Auth open={openAuthModal} setOpen={setOpenAuthModal}/>
             </AppBar>
-            <div className={"page"}>
+            <Box className={"page"} sx={{
+                height: "calc(100% - 70px)",
+                width: "100%"
+            }}>
                 <Outlet/>
-            </div>
+            </Box>
         </>
     );
 }

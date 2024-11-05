@@ -1,6 +1,5 @@
 import {useParams, useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
-import {useOpenSnackbar} from "../context/SnackbarContext.tsx";
 import ChatBox from "../components/ChatBox.tsx";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -9,43 +8,73 @@ import {KeyboardArrowLeft, KeyboardArrowRight, PlayArrow, Share} from "@mui/icon
 import Box from "@mui/material/Box";
 import TankImage from "../components/TankImage.tsx";
 import IconButton from "@mui/material/IconButton";
-import {useUser} from "../context/AuthContext.tsx";
+import {useAccessToken, useUser} from "../context/AuthContext.tsx";
 import Auth from "../components/Auth.tsx";
+import GameCanvas from "../components/GameCanvas.tsx";
+import {io, Socket} from "socket.io-client";
 
 function Arena() {
-    const user = useUser()
-    if(!user) return <Auth open={true} />
-
     const params = useParams()
-    const openSnackbar = useOpenSnackbar()
-    // const [isStarted, setIsStarted] = useState(false)
-    const [hull, setHull] = useState("churchill")
-    const [turret, setTurret] = useState("churchill")
+    const [hullIndex, setHullIndex] = useState(0)
+    const [turretIndex, setTurretIndex] = useState(0)
     const navigate = useNavigate();
     const [arenaId, setArenaId] = useState(params["arenaId"] || "public")
-    // let arenaId = params["arenaId"]
-    if (!params["arenaId"])
-        navigate("/arena/public")
+    const [gameStatus, setGameStatus] = useState("stopped")
+    const accessToken = useAccessToken()
+    const user = useUser()
+
+    const [socket, setSocket] = useState<Socket | null>(null)
 
 
     useEffect(() => {
         console.log("Arena ID: ", arenaId)
-        // if (!arenaId) {
-        //     console.log(`${new Date().getTime()}`)
-        //     setArenaId("public")
-        //     navigate("/arena/public")
-        // }
 
 
         document.title = `sHell Yeah! | Arena : ${arenaId}`
+
     }, [arenaId]);
 
-    console.log("Arena return ID: ", arenaId)
+    useEffect(() => {
 
+        if(!accessToken) return
+        const socket = io("localhost:3000", {
+            transports: ["websocket", "polling"], // or [ "websocket", "polling" ] (the order matters)
+            auth: {
+                token: accessToken
+            }
+        })
+        console.log("socket connected")
+
+        socket.emit("join_arena", {arenaId})
+        setSocket(socket)
+
+        return () => {
+            if (socket)
+                socket.close()
+        }
+    }, [accessToken]);
+    // console.log("user", user)
+    // console.log("accessToken",accessToken)
+
+    if (!user) return <Auth open={true}/>
+    if (!socket) return <Typography>Loading...</Typography>
+
+    if (!params["arenaId"])
+        navigate("/arena/public")
+
+    const hulls = ["churchill", "crusader"]
+    const turrets = ["churchill", "crusader"]
+
+    const hull = hulls[hullIndex]
+    const turret = turrets[turretIndex]
+    // console.log("Arena return ID: ", arenaId)
+
+    console.log({hullIndex, turretIndex})
+    console.log({hull, turret})
     return (
         <>
-            <ChatBox arenaId={arenaId}/>
-            <Box sx={{
+            <ChatBox arenaId={arenaId} socket={socket}/>
+            {gameStatus === "stopped" && <Box sx={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -54,11 +83,15 @@ function Arena() {
             }}>
                 <Typography variant="h3" sx={{margin: 5}}>Let the party begin!</Typography>
                 <Box>
-                    <IconButton>
+                    <IconButton onClick={() => {
+                        setHullIndex((hullIndex - 1 + hulls.length) % hulls.length)
+                    }}>
                         <KeyboardArrowLeft/>
                     </IconButton>
                     <Typography variant="h5" sx={{margin: 5, display: "inline-block"}}>Hull - {hull}</Typography>
-                    <IconButton>
+                    <IconButton onClick={() => {
+                        setHullIndex((hullIndex + 1) % hulls.length)
+                    }}>
                         <KeyboardArrowRight/>
                     </IconButton>
                 </Box>
@@ -76,12 +109,20 @@ function Arena() {
                     </CardActions>
                 </Card>
                 <Box>
-                    <IconButton size={"large"}>
+                    <IconButton size={"large"} onClick={
+                        () => {
+                            setTurretIndex((turretIndex - 1 + turrets.length) % turrets.length)
+                        }
+                    }>
                         <KeyboardArrowLeft/>
                     </IconButton>
                     <Typography variant="h5" sx={{margin: 5, display: "inline-block"}} paragraph>Turret
                         - {turret}</Typography>
-                    <IconButton size={"large"}>
+                    <IconButton size={"large"} onClick={
+                        () => {
+                            setTurretIndex((turretIndex + 1) % turrets.length)
+                        }
+                    }>
                         <KeyboardArrowRight/>
                     </IconButton>
                 </Box>
@@ -96,9 +137,12 @@ function Arena() {
                         navigate(`/arena/${e.currentTarget.value}`)
                         setArenaId(e.currentTarget.value)
                     }}></TextField>
-                    <Button startIcon={<PlayArrow/>} variant={"contained"}>Play</Button>
+                    <Button startIcon={<PlayArrow/>} variant={"contained"} onClick={() => {
+                        setGameStatus("started")
+                    }}>Play</Button>
                 </Box>
-            </Box>
+            </Box>}
+            {gameStatus === "started" && <GameCanvas socket={socket}/>}
         </>
     )
 }

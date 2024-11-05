@@ -1,6 +1,6 @@
 const { parentPort } = require('worker_threads');
-const Entity = require('./model/Entity');
-const Player = require('./model/Player');
+const Entity = require('./src/model/Entity');
+const Player = require('./src/model/Player');
 function getEntityById(id, entities) {
     console.log(entities)
     return entities.find(entity => entity.id = id)

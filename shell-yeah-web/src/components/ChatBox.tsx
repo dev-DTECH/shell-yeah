@@ -1,8 +1,8 @@
 import {useEffect, useRef, useState} from "react";
-import {io, Socket} from "socket.io-client";
+import {Socket} from "socket.io-client";
 import {useOpenSnackbar} from "../context/SnackbarContext.tsx";
-import {useAccessToken, useUser} from "../context/AuthContext.tsx";
-import {List, ListItem, ListItemAvatar, ListItemText, TextField} from "@mui/material";
+import {useUser} from "../context/AuthContext.tsx";
+import {List, ListItem, ListItemAvatar, ListItemText, Paper, TextField} from "@mui/material";
 import {KeyboardArrowDown, SendRounded} from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
@@ -21,34 +21,23 @@ type Message =
         sentAt: Date
     }
 
-function ChatBox({arenaId}: { arenaId: string }) {
+function ChatBox({arenaId, socket}: { arenaId: string, socket: Socket }) {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [socket, setSocket] = useState<Socket | null>(null);
     const openSnackbar = useOpenSnackbar()
     const user = useUser()
     const messageRef = useRef<HTMLInputElement>()
     const messagesEndRef = useRef<HTMLDivElement>(null)
-    const accessToken = useAccessToken()
     const [isExpanded, setIsExpanded] = useState(false)
 
     useEffect(() => {
         if (!user) return
         const timeout = setTimeout(() => {
-            const socket = io("localhost:3000", {
-                // WARNING: in that case, there is no fallback to long-polling
-                transports: ["websocket", "polling"], // or [ "websocket", "polling" ] (the order matters)
-                extraHeaders: {
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
-            setSocket(socket);
-            socket.emit("join_arena", arenaId);
 
             socket.on("message", (data: Message) => {
                 setMessages((messages) => [...messages, data]);
             });
             socket.io.on("reconnect", () => {
-                socket.emit("join_arena", arenaId);
+                socket.emit("join_arena", {arenaId});
                 openSnackbar("Reconnected successfully!")
             });
             socket.io.on("reconnect_attempt", (attempt) => {
@@ -61,8 +50,6 @@ function ChatBox({arenaId}: { arenaId: string }) {
 
         return () => {
             clearTimeout(timeout)
-            if (socket)
-                socket.close()
         }
     }, [arenaId, user]);
 
@@ -90,69 +77,57 @@ function ChatBox({arenaId}: { arenaId: string }) {
             borderTopRightRadius: 10,
             boxShadow: "0px 0px 6px #B2B2B2",
             overflow: "hidden",
+            zIndex: 1000,
         }}>
-            <List
-                sx={{
-                    width: '100%',
-                    maxWidth: 360,
-                    bgcolor: 'grey',
-                    height: 500,
-                    display: isExpanded ? "block" : "none",
-                    // padding: isExpanded ? 8: null,
-                    overflowY: isExpanded ? "scroll" : "hidden",
-                    transition: "height 0.1s ease-in-out"
-                }}>
-                {
-                    messages.map((message, index) =>
-                        <ListItem key={index}>
-                            <ListItemAvatar>
-                                <Avatar src={message.user?.avatar}/>
-                            </ListItemAvatar>
-                            <ListItemText primary={message.user?.username} secondary={message.message}/>
-                        </ListItem>
-                    )
-                }
-                <div ref={messagesEndRef}/>
-            </List>
-            <form onSubmit={sendMessage}>
+            <Paper>
 
-                <Box sx={{display: "flex"}}>
-                    <IconButton color="primary" aria-label="Expand/Collapse chat"
-                                onClick={() => setIsExpanded(isExpanded => !isExpanded)}>
-                        <KeyboardArrowDown
-                            sx={{rotate: isExpanded ? 0 : "180deg", transition: "rotate 0.1s ease-in-out"}}/>
-                    </IconButton>
+                <List
+                    sx={{
+                        width: '100%',
+                        maxWidth: 360,
+                        bgcolor: 'grey',
+                        height: 500,
+                        display: isExpanded ? "block" : "none",
+                        // padding: isExpanded ? 8: null,
+                        overflowY: isExpanded ? "scroll" : "hidden",
+                        transition: "height 0.1s ease-in-out"
+                    }}>
                     {
-                        isExpanded ?
-                            <>
-                                <TextField autoFocus={isExpanded} label="Type here" variant="filled" required
-                                           inputRef={messageRef}/>
-                                <IconButton type={"submit"} color="primary" aria-label="Send Message">
-                                    <SendRounded/>
-                                </IconButton>
-                            </>
-                            :
-                            <Button onClick={() => setIsExpanded(true)}>Expand Chat</Button>
+                        messages.map((message, index) =>
+                            <ListItem key={index}>
+                                <ListItemAvatar>
+                                    <Avatar src={message.user?.avatar}/>
+                                </ListItemAvatar>
+                                <ListItemText primary={message.user?.username} secondary={message.message}/>
+                            </ListItem>
+                        )
                     }
-                </Box>
-            </form>
-        </Box>
+                    <div ref={messagesEndRef}/>
+                </List>
+                <form onSubmit={sendMessage}>
 
-        // <div className="chat-box">
-        //     <div className="messages">
-        //         {messages.map((message, index) => (
-        //             <div key={index} className="message">
-        //                 {message}
-        //             </div>
-        //         ))}
-        //     </div>
-        //     <input
-        //         type="text"
-        //         value={message}
-        //         onChange={(e) => setMessage(e.target.value)}
-        //     />
-        //     <button onClick={sendMessage}>Send</button>
-        // </div>
+                    <Box sx={{display: "flex"}}>
+                        <IconButton color="primary" aria-label="Expand/Collapse chat"
+                                    onClick={() => setIsExpanded(isExpanded => !isExpanded)}>
+                            <KeyboardArrowDown
+                                sx={{rotate: isExpanded ? 0 : "180deg", transition: "rotate 0.1s ease-in-out"}}/>
+                        </IconButton>
+                        {
+                            isExpanded ?
+                                <>
+                                    <TextField autoFocus={isExpanded} label="Type here" variant="filled" required
+                                               inputRef={messageRef}/>
+                                    <IconButton type={"submit"} color="primary" aria-label="Send Message">
+                                        <SendRounded/>
+                                    </IconButton>
+                                </>
+                                :
+                                <Button onClick={() => setIsExpanded(true)}>Expand Chat</Button>
+                        }
+                    </Box>
+                </form>
+            </Paper>
+        </Box>
     );
 }
 

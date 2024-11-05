@@ -2,11 +2,11 @@ import { createClient } from "redis";
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import config from 'config';
-import Player from './model/Player.js';
+import Player from './src/model/Player.js';
 import chalk from 'chalk';
 let players = []
 // const pubClient = createClient({ url: "redis://redis:6379" });
-const pubClient = createClient({ url: "redis://redis-10970.c305.ap-south-1-1.ec2.cloud.redislabs.com:10970", username: "default", password: "OHY6lbN9A9bir4h0B5bqsNdGltHkvuey" });
+const pubClient = createClient({ url: "redis://127.0.0.1:6379", username: "default", password: "OHY6lbN9A9bir4h0B5bqsNdGltHkvuey" });
 
 const subClient = pubClient.duplicate();
 const redisClient = pubClient.duplicate();

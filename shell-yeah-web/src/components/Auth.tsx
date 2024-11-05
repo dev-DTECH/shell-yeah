@@ -15,8 +15,16 @@ import {isAxiosError} from "axios";
 //     fullName?: string
 // }
 
+type AuthProps = {
+    open: boolean,
+    setOpen?: ((open: boolean) => void)
+}
 
-function Auth({open, setOpen}: { open: boolean, setOpen: (open: boolean) => void }) {
+function Auth({open, setOpen}: AuthProps) {
+    if(setOpen === undefined) {
+        setOpen = () => {}
+    }
+
     const setUser = useSetUser()
     const [isLogin, setIsLogin] = useState(true)
 
@@ -42,7 +50,11 @@ function Auth({open, setOpen}: { open: boolean, setOpen: (open: boolean) => void
                                     username: usernameRef.current?.value,
                                     password: passwordRef.current?.value
                                 })
-                                setUser(res.data.user)
+                                const {user, accessToken} = res.data
+                                setUser({
+                                    ...user,
+                                    accessToken
+                                })
                                 openSnackbar(res.data.message)
                             } catch (e) {
                                 if (isAxiosError(e))

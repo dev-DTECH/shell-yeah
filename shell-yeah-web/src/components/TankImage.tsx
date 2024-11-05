@@ -6,23 +6,24 @@ import churchillTurret from '../assets/tanks/churchill/turret.png'
 import Box from "@mui/material/Box";
 import {useEffect, useState} from "react";
 
-const TankAssets = {
-    crusader: {
+const TankAssets: Record<string, { hull: string, turret: string }> = {
+    "crusader": {
         hull: crusaderHull,
         turret: crusaderTurret,
     },
-    churchill: {
+    "churchill": {
         hull: churchillHull,
         turret: churchillTurret,
     },
 }
 
-export default function TankImage({turret, hull}) {
+export default function TankImage({turret, hull}: { turret: string, hull: string }) {
     const [turretRotation, setTurretRotation] = useState(0)
 
     useEffect(() => {
-        document.addEventListener("mousemove", (e) => {
+        function handleMouseMove(e: MouseEvent) {
             const turretEle = document.querySelector("img[title='tank turret']")
+            if (!turretEle) return
 
             const x = e.clientX
             const y = e.clientY
@@ -31,7 +32,13 @@ export default function TankImage({turret, hull}) {
             const angle = Math.atan2(y - centerY, x - centerX) * 180 / Math.PI + 90
 
             setTurretRotation(angle)
-        })
+        }
+
+        document.addEventListener("mousemove", handleMouseMove)
+
+        return () => {
+            document.removeEventListener("mousemove", handleMouseMove)
+        }
     }, []);
     return (
         <Box sx={{display: "flex", placeContent: "center"}}>
@@ -43,7 +50,7 @@ export default function TankImage({turret, hull}) {
                 />
                 <img
                     style={{height: 140, position: "absolute", top: 0, left: 0, rotate: `${turretRotation}deg`}}
-                    src={TankAssets[hull].turret}
+                    src={TankAssets[turret].turret}
                     title="tank turret"
                 />
             </Box>
