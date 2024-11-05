@@ -1,5 +1,5 @@
 class Controller {
-    key: Record<string, boolean> = {}
+    key: Record<string, boolean | number> = {}
     config: Record<string, string[]>
     move = () => {
     };
@@ -30,12 +30,19 @@ class Controller {
         let isChanged = false
         for (const k in this.config) {
             if (this.config[k] && this.config[k].includes(key)) {
-                isChanged = isChanged || this.key[k]
+                isChanged = isChanged || !!this.key[k]
                 this.key[k] = false
             }
         }
         if (isChanged)
             this.move()
+    }
+    handleMouseMove = (event: MouseEvent) => {
+        const {offsetX, offsetY} = event;
+        const canvasContainer = document.querySelector("#game-canvas") as HTMLElement;
+        const {height, width} = canvasContainer.getBoundingClientRect();
+        this.key.angle = Math.atan2(offsetY-height/2, offsetX-width/2) + Math.PI / 2;
+        this.move()
     }
     onMove = (callback: () => void) => {
         this.move = callback

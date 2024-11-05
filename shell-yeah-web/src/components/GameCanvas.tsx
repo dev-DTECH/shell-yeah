@@ -1,10 +1,11 @@
 import {useEffect, useState} from 'react';
 
-import {Application, Assets, Sprite, Text} from 'pixi.js';
+import {Application, Assets, Graphics, Sprite, Text} from 'pixi.js';
 import {Socket} from "socket.io-client";
 import Stats from './Stats';
 import Controller from '../Controller';
 import Box from "@mui/material/Box";
+import SpriteWrapper from "../model/SpriteWrapper.ts";
 
 type Entity = {
     id: string;
@@ -33,7 +34,7 @@ export default function GameCanvas({socket}: { socket: Socket }) {
         const app = new Application();
         await Assets.load(["http://localhost:3000/assets/tank/churchill/turret.png", "http://localhost:3000/assets/tank/churchill/hull.png"])
         const canvasContainer = document.querySelector("#game-canvas") as HTMLElement;
-        if (!canvasContainer) return;
+        if (!canvasContainer) return app;
         await app.init({
             background: '#1099bb',
             resizeTo: canvasContainer
@@ -84,12 +85,22 @@ export default function GameCanvas({socket}: { socket: Socket }) {
 
                 // Render weapon
                 if (entity.weapon) {
-                    const weaponTexture = await Assets.load(`http://localhost:3000/assets/tank/${entity.weapon.texture}/turret.png`);
-                    const weaponSprite = new Sprite(weaponTexture);
-                    weaponSprite.anchor.set(0.5);
-                    weaponSprite.x = updatedEntity.x;
-                    weaponSprite.y = updatedEntity.y;
-                    app.stage.addChild(weaponSprite);
+                    const weaponSprite = new SpriteWrapper({
+                        texturePath: `http://localhost:3000/assets/tank/${entity.weapon.texture}/turret.png`,
+                        x: updatedEntity.x,
+                        y: updatedEntity.y,
+                        scale: 1,
+                        rotation: entity.weapon.rotation,
+                        anchor: {x: 0.5, y: 0.5},
+                        interactive: false,
+                    })
+                    weaponSprite.addToStage(app.stage);
+                    // const weaponTexture = await Assets.load(`http://localhost:3000/assets/tank/${entity.weapon.texture}/turret.png`);
+                    // const weaponSprite = new Sprite(weaponTexture);
+                    // weaponSprite.anchor.set(0.5);
+                    // weaponSprite.x = updatedEntity.x;
+                    // weaponSprite.y = updatedEntity.y;
+                    // app.stage.addChild(weaponSprite);
                 }
 
 
@@ -151,21 +162,24 @@ export default function GameCanvas({socket}: { socket: Socket }) {
         });
         window.addEventListener('keydown', controller.handleKeyDown);
         window.addEventListener('keyup', controller.handleKeyUp);
+        canvasContainer.addEventListener('mousemove', controller.handleMouseMove);
         app.resize()
         return app
     }
 
-
     useEffect(() => {
+
+        let app: Application;
         startGame()
-            .then(() => {
-                console.log("Game started")
+            .then((param) => {
+                app = param
             })
 
         return () => {
-            const canvasContainer = document.querySelector("#game-canvas") as HTMLElement;
-            canvasContainer.remove()
+            if (app)
+                app.destroy(true, {children: true})
         }
+
     }, []);
 
     return (
@@ -173,12 +187,4 @@ export default function GameCanvas({socket}: { socket: Socket }) {
             <Stats tps={tps} ping={ping} entityCount={0}/>
         </Box>
     );
-
-    // return (
-    //     <div>
-    //         <Suspense fallback={<div>Loading...</div>}>
-    //             <div id={"game-canvas"}></div>
-    //         </Suspense>
-    //     </div>
-    // );
 }

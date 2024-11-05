@@ -71,7 +71,7 @@ export default function gameloop(io: Server) {
                                         name: entity.name,
                                         x: entity.x,
                                         y: entity.y,
-                                        weapon: (entity as Player).weapon,
+                                        weaponRotation: (entity as Player).weapon.rotation,
                                         // rotation: entity.rotation,
                                         // rotationSpeed: entity.rotationSpeed,
                                         // deltaTime

@@ -6,7 +6,7 @@ import {entities} from "../data/entities";
 
 export default async function ({socket, data}: {
     socket: Socket,
-    data: { key: Record<string, boolean> }
+    data: { key: Record<string, boolean | number> }
 }) {
     const clientPlayer = entities[socket.id] as Player
     console.log(data.key)
@@ -19,6 +19,8 @@ export default async function ({socket, data}: {
         clientPlayer.rotationSpeed = config.get('player.rotationSpeed') * (data.key.right ? 1 : -1)
     else
         clientPlayer.rotationSpeed = 0
+
+    clientPlayer.weapon.rotation = Number(data.key.angle)
 
     // const arenaId = Array.from(socket.rooms)[1]
     // await updateEntity(clientPlayer, arenaId)

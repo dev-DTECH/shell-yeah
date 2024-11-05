@@ -56,8 +56,8 @@ function Arena() {
     // console.log("user", user)
     // console.log("accessToken",accessToken)
 
-    if (!user) return <Auth open={true}/>
-    if (!socket) return <Typography>Loading...</Typography>
+    // if (!user) return <Auth open={true}/>
+    // if (!socket) return <Typography>Loading...</Typography>
 
     if (!params["arenaId"])
         navigate("/arena/public")

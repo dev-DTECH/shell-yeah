@@ -1,5 +1,5 @@
 {
-    "tps": 2,
+    "tps": 20,
     "debug": {
         "showTPS": false
 
@@ -13,6 +13,7 @@
         "up": ["w", "ArrowUp"],
         "down": ["s", "ArrowDown"],
         "left": ["a", "ArrowLeft"],
-        "right": ["d", "ArrowRight"]
+        "right": ["d", "ArrowRight"],
+        "shoot": [" "]
     }
 }
