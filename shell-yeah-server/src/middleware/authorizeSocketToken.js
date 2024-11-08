@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken"
 configDotenv()
 export default function authorizeSocketToken(socket, next) {
     const token = socket.handshake.auth.token
-    console.log(token)
     if (token == null) {
         // socket.emit("error", "Unauthorized User")
         return next(new Error("Unauthorized User"))

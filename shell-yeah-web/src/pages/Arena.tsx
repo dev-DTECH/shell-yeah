@@ -22,6 +22,7 @@ function Arena() {
     const [gameStatus, setGameStatus] = useState("stopped")
     const accessToken = useAccessToken()
     const user = useUser()
+    const [map, setMap] = useState({})
 
     const [socket, setSocket] = useState<Socket | null>(null)
 
@@ -45,7 +46,11 @@ function Arena() {
         })
         console.log("socket connected")
 
-        socket.emit("join_arena", {arenaId})
+        socket.emit("join_arena", {arenaId}, (data) => {
+            console.log("join_arena", data)
+            setMap(data.map)
+
+        })
         setSocket(socket)
 
         return () => {
@@ -56,8 +61,8 @@ function Arena() {
     // console.log("user", user)
     // console.log("accessToken",accessToken)
 
-    // if (!user) return <Auth open={true}/>
-    // if (!socket) return <Typography>Loading...</Typography>
+    if (!user) return <Auth open={true}/>
+    if (!socket) return <Typography>Loading...</Typography>
 
     if (!params["arenaId"])
         navigate("/arena/public")
@@ -142,7 +147,7 @@ function Arena() {
                     }}>Play</Button>
                 </Box>
             </Box>}
-            {gameStatus === "started" && <GameCanvas socket={socket}/>}
+            {gameStatus === "started" && <GameCanvas socket={socket} map={map}/>}
         </>
     )
 }

@@ -1,11 +1,12 @@
 {
     "tps": 20,
+    "map_size": 10,
     "debug": {
         "showTPS": false
 
     },
     "player": {
-        "speed": 0.5,
+        "speed": 0.1,
         "rotationSpeed": 0.01,
         "viewDistance": 2000
     },

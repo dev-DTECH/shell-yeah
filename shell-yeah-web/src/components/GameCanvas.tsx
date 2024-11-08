@@ -1,11 +1,10 @@
 import {useEffect, useState} from 'react';
 
-import {Application, Assets, Graphics, Sprite, Text} from 'pixi.js';
+import {Application, Assets, Container, SCALE_MODES, Sprite, Text, Texture} from 'pixi.js';
 import {Socket} from "socket.io-client";
 import Stats from './Stats';
 import Controller from '../Controller';
 import Box from "@mui/material/Box";
-import SpriteWrapper from "../model/SpriteWrapper.ts";
 
 type Entity = {
     id: string;
@@ -26,7 +25,85 @@ type SyncPacket = {
     entities: Entity[]
 }
 
-export default function GameCanvas({socket}: { socket: Socket }) {
+const textureBaseUrl = "http://localhost:3000/assets/map/tiles"
+const tileSize = 160; // or whatever your tile size is
+const tileTextures: Record<number, Texture> = {
+    0: await Assets.load(`${textureBaseUrl}/tile_0001.png`),
+    1: await Assets.load(`${textureBaseUrl}/tile_0020.png`),
+    2: await Assets.load(`${textureBaseUrl}/tile_0056.png`),
+    3: await Assets.load(`${textureBaseUrl}/tile_0054.png`),
+    4: await Assets.load(`${textureBaseUrl}/tile_0018.png`),
+
+    5: await Assets.load(`${textureBaseUrl}/tile_0093.png`),
+    6: await Assets.load(`${textureBaseUrl}/tile_0090.png`),
+    7: await Assets.load(`${textureBaseUrl}/tile_0091.png`),
+    8: await Assets.load(`${textureBaseUrl}/tile_0092.png`),
+
+    9: await Assets.load(`${textureBaseUrl}/tile_0038.png`),
+    10: await Assets.load(`${textureBaseUrl}/tile_0055.png`),
+    11: await Assets.load(`${textureBaseUrl}/tile_0036.png`),
+    12: await Assets.load(`${textureBaseUrl}/tile_0019.png`),
+
+    13: await Assets.load(`${textureBaseUrl}/tile_0130.png`),
+    14: await Assets.load(`${textureBaseUrl}/tile_0166.png`),
+    15: await Assets.load(`${textureBaseUrl}/tile_0110.png`),
+    16: await Assets.load(`${textureBaseUrl}/tile_0144.png`),
+    17: await Assets.load(`${textureBaseUrl}/tile_0129.png`),
+    18: await Assets.load(`${textureBaseUrl}/tile_0165.png`),
+    19: await Assets.load(`${textureBaseUrl}/tile_0163.png`),
+    20: await Assets.load(`${textureBaseUrl}/tile_0127.png`),
+    21: await Assets.load(`${textureBaseUrl}/tile_0130.png`),
+    22: await Assets.load(`${textureBaseUrl}/tile_0166.png`),
+    23: await Assets.load(`${textureBaseUrl}/tile_0130.png`),
+    24: await Assets.load(`${textureBaseUrl}/tile_0166.png`),
+    // add other textures as needed
+};
+console.log(Object.keys(tileTextures).length)
+
+function renderMap(position: { x: number, y: number }, tileMap: Record<string, number>) {
+    const worldContainer = new Container({
+        // this will make moving this container GPU powered
+        isRenderGroup: true,
+    });
+    for (const key in tileMap) {
+        // console.log()
+        const [x, y] = key.split(',').map(Number);
+        const tileType = tileMap[key];
+        tileTextures[tileType].baseTexture.scaleMode = SCALE_MODES.NEAREST;
+        const sprite = new Sprite({
+            texture: tileTextures[tileType],
+            x: y * tileSize,
+            y: x * tileSize,
+            width: tileSize,
+            height: tileSize,
+            anchor: 0.5
+        });
+        // const coords = new Text({
+        //     x: y * tileSize,
+        //     y: x * tileSize,
+        //     width: tileSize / 2,
+        //     height: tileSize / 2,
+        //     anchor: 0.5,
+        //     text: key
+        // })
+
+        // const sprite = new Graphics({
+        //         x: x * tileSize,
+        //         y: y * tileSize,
+        // })
+        //
+        // sprite.circle(0, 0, 2)
+        // sprite.fill(0x0000ff)
+        // worldContainer.width = 1000
+        // worldContainer.height = 1000
+        worldContainer.addChild(sprite);
+    }
+    worldContainer.x = position.x
+    worldContainer.y = position.y
+    return worldContainer;
+}
+
+export default function GameCanvas({socket, map}: { socket: Socket, map: Record<string, number> }) {
     const [tps, setTPS] = useState(0);
     const [ping, setPing] = useState(0);
 
@@ -40,6 +117,17 @@ export default function GameCanvas({socket}: { socket: Socket }) {
             resizeTo: canvasContainer
         });
         canvasContainer?.appendChild(app.canvas);
+        let me: Entity | undefined
+        const mapContainer = renderMap({
+            x: 0,
+            y: 0,
+        }, map)
+        app.stage.addChild(mapContainer);
+
+        let entityContainer = new Container({
+            height: app.canvas.height,
+            width: app.canvas.width
+        })
 
         let startTime = performance.now();
         let tps = 0
@@ -53,10 +141,22 @@ export default function GameCanvas({socket}: { socket: Socket }) {
             } else {
                 tps++;
             }
-            const me = data.entities.find((entity) => entity.id === socket.id);
-            // console.table(me)
+            me = data.entities.find((entity) => entity.id === socket.id);
             if (!me) return;
-            app.stage.removeChildren();
+
+            mapContainer.x = me.x + app.canvas.width / 2
+            mapContainer.y = me.y + app.canvas.height / 2
+
+            // app.stage.removeChildren();
+            // console.log({map})
+            entityContainer.destroy({children: true})
+            entityContainer = new Container({
+                height: app.canvas.height,
+                width: app.canvas.width
+            })
+            app.stage.addChild(entityContainer);
+
+
             data.entities.forEach(async (entity) => {
                 let updatedEntity: Entity
                 if (entity.id === socket.id) {
@@ -68,6 +168,8 @@ export default function GameCanvas({socket}: { socket: Socket }) {
                     }
 
                 } else {
+                    if (!me) return;
+
                     updatedEntity = {
                         ...entity,
                         x: me.x - entity.x + app.canvas.width / 2,
@@ -81,20 +183,30 @@ export default function GameCanvas({socket}: { socket: Socket }) {
                 entitySprint.y = updatedEntity.y;
                 entitySprint.rotation = updatedEntity.rotation;
                 // console.log(me)
-                app.stage.addChild(entitySprint);
+                entityContainer.addChild(entitySprint);
 
                 // Render weapon
                 if (entity.weapon) {
-                    const weaponSprite = new SpriteWrapper({
-                        texturePath: `http://localhost:3000/assets/tank/${entity.weapon.texture}/turret.png`,
+                    const weaponTexture = await Assets.load(`http://localhost:3000/assets/tank/${entity.weapon.texture}/turret.png`);
+                    // const weaponSprite = new SpriteWrapper({
+                    //     texturePath: `http://localhost:3000/assets/tank/${entity.weapon.texture}/turret.png`,
+                    //     x: updatedEntity.x,
+                    //     y: updatedEntity.y,
+                    //     scale: 1,
+                    //     rotation: entity.weapon.rotation,
+                    //     anchor: {x: 0.5, y: 0.5},
+                    //     interactive: false,
+                    // })
+                    const weaponSprite = new Sprite({
+                        texture: weaponTexture,
                         x: updatedEntity.x,
                         y: updatedEntity.y,
                         scale: 1,
                         rotation: entity.weapon.rotation,
                         anchor: {x: 0.5, y: 0.5},
-                        interactive: false,
                     })
-                    weaponSprite.addToStage(app.stage);
+
+                    entityContainer.addChild(weaponSprite);
                     // const weaponTexture = await Assets.load(`http://localhost:3000/assets/tank/${entity.weapon.texture}/turret.png`);
                     // const weaponSprite = new Sprite(weaponTexture);
                     // weaponSprite.anchor.set(0.5);
@@ -116,7 +228,7 @@ export default function GameCanvas({socket}: { socket: Socket }) {
                 entityName.y = updatedEntity.y - 50; // Position above the sprite
 
                 // Add the text to the stage
-                app.stage.addChild(entityName);
+                entityContainer.addChild(entityName);
 
                 // Weapon
                 const weapon = new Text("A", {
@@ -129,7 +241,7 @@ export default function GameCanvas({socket}: { socket: Socket }) {
                 weapon.anchor.set(0.5);
                 weapon.x = 0;
                 weapon.y = 0; // Position above the sprite
-                app.stage.addChild(weapon);
+                entityContainer.addChild(weapon);
                 // app.stage.interactive = true;
                 // canvasContainer.addEventListener('mousemove', (event) => {
                 //     const {x, y} = event;
@@ -178,9 +290,12 @@ export default function GameCanvas({socket}: { socket: Socket }) {
         return () => {
             if (app)
                 app.destroy(true, {children: true})
+            socket.disconnect();
         }
 
     }, []);
+    if (!socket) return
+
 
     return (
         <Box tabIndex={0} autoFocus id='game-canvas' sx={{height: "100%"}}>

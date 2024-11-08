@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- the main library -->
+<script src="ndwfc.js"></script>
+
+<!-- optional helpful tools -->
+<script src="ndwfc-tools.js"></script>
+<script>
+    function seedRandom(seed) {
+        let m = 0x80000000; // 2**31
+        let a = 1103515245;
+        let c = 12345;
+        let state = seed ? seed : Math.floor(Math.random() * m);
+
+        return function() {
+            state = (a * state + c) % m;
+            return state / (m - 1);
+        };
+    }
+
+    // Example usage:
+    // Set a seed for reproducible results
+    const mySeededRandom = seedRandom(1234);
+    console.log(mySeededRandom()); // Use this instead of Math.random()
+
+    // Override Math.random with the seeded version
+    Math.random = mySeededRandom;
+    // initialize the 2d tool
+    var tool = new WFCTool2D();
+    // Ground
+    tool.addTile(`\
+....
+....
+....
+....`);
+    // Water
+    tool.addTile(`\
+....
+....
+WW..
+WW..`);
+    tool.addTile(`\
+WWWW
+WWWW
+..WW
+..WW`);
+    tool.addTile(`\
+WW..
+WW..
+WW..
+WW..`);
+//     tool.addTile(`\
+// WWWW
+// WWWW
+// WWWW
+// WWWW`);
+
+    // Bridge
+    tool.addTile(`\
+WWWW
+####
+####
+WWWW`);
+    // Road
+    tool.addTile(`\
+....
+####
+####
+....`);
+    tool.addTile(`\
+....
+###.
+###.
+.##.`);
+    tool.addTile(`\
+WW..
+####
+####
+WW..`, {transforms: 'auto', weight: 0.5});
+
+//     // Bush
+//     tool.addTile(`\
+// ....
+// ....
+// BB..
+// BB..`);
+//     tool.addTile(`\
+// ....
+// ..T.
+// ....
+// ....`);
+
+
+
+    //     // Wooden walls
+    //     tool.addTile(`\
+    // ....
+    // ....
+    // ####
+    // ....`, {transforms:'auto', weight:0.1});
+    //     tool.addTile(`\
+    // .#..
+    // .#..
+    // .###
+    // ....`, {transforms:'auto', weight:0.1});
+    //     tool.addTile(`\
+    // ....
+    // ..##
+    // ....
+    // ....`, {transforms:'auto', weight:0.1});
+
+    // Ground (green)
+    tool.addColor(".", [0, 255, 0]);
+    // Road (black)
+    tool.addColor("#", [0, 0, 0]);
+    // Water (blue)
+    tool.addColor("W", [0, 0, 255]);
+    // // Tree (deep green)
+    // tool.addColor("T", [0, 100, 0]);
+    // // Bush (deep green)
+    // tool.addColor("B", [0, 100, 0]);
+
+    console.log(tool.getTileFormulae());
+
+    // this generates all the input which you can directly pass to WFC
+    var wfcInput = tool.generateWFCInput();
+    var wfc = new WFC(wfcInput);
+    size = 10
+    wfc.expand([-size, -size], [size, size]);
+    let done = false
+    const start = performance.now()
+    while (!done) {
+        // console.log('Generating...')
+        done = wfc.step()
+    }
+    console.log('Map Generated in', performance.now() - start, 'ms')
+    const map = wfc.readout()
+    console.log(new Set(Object.values(map)).size)
+    console.log(map)
+
+
+    // visualize the output on a HTML canvas
+    var canvas = document.createElement("canvas");
+    canvas.width = window.innerHeight;
+    canvas.height = window.innerHeight;
+    canvas.style.position = "absolute";
+    canvas.style.left = "0px";
+    canvas.style.top = "0px";
+    var canvas2 = document.createElement("canvas");
+    canvas2.width = window.innerHeight;
+    canvas2.height = window.innerHeight;
+    canvas2.style.position = "absolute";
+    canvas2.style.left = `${window.innerHeight}px`;
+    canvas2.style.top = "0px";
+    document.body.appendChild(canvas);
+    document.body.appendChild(canvas2);
+    var viewport = {x: -size, y: -size, w: 2*size, h: 2*size}; // the region you want to visualize
+    var viewport2 = {x: 0, y: 0, w: size, h: size}; // the region you want to visualize
+    tool.plotWFCOutput(canvas, viewport, map); // plot it!
+    // tool.plotWFCOutput(canvas2, viewport2, map); // plot it!
+</script>
+</body>
+</html>

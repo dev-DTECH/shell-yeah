@@ -1,4 +1,6 @@
 import redisClient from "../config/redis";
+import generateMap from "../utils/map";
+import config from "config";
 
 
 export async function getAllArenaIds() {
@@ -6,7 +8,15 @@ export async function getAllArenaIds() {
 }
 
 export async function createArena(id: string) {
+    const map = generateMap(config.get("map_size"))
+    await redisClient.set(`map:${id}`, JSON.stringify(map));
     await redisClient.sAdd('arenas', id);
+
+    console.log(`Created arena ${id}`)
+}
+
+export async function getArenaMap(id: string): Promise<Record<string, number>> {
+    return JSON.parse(await redisClient.get(`map:${id}`));
 }
 
 export async function deleteArena(id: string) {

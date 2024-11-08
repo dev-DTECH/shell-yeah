@@ -9,7 +9,7 @@ export default async function ({socket, data}: {
     data: { key: Record<string, boolean | number> }
 }) {
     const clientPlayer = entities[socket.id] as Player
-    console.log(data.key)
+    // console.log(data.key)
 
     if (data.key.up || data.key.down)
         clientPlayer.velocity.y = config.get('player.speed') * (data.key.up ? 1 : -1)

@@ -49,7 +49,7 @@ export default function gameloop(io: Server) {
                         // console.log(`Syncing arena ${arenaId}`)
                         const roomSocketIdsSet = io.sockets.adapter.rooms.get(`arena:${arenaId}`)
                         if (!roomSocketIdsSet) {
-                            console.log(`No players in arena ${arenaId}`)
+                            // console.log(`No players in arena ${arenaId}`)
                             return
                         }
                         const roomSocketIds = Array.from(roomSocketIdsSet)
@@ -66,17 +66,17 @@ export default function gameloop(io: Server) {
                                 io.to(socketId).emit("sync", {entities: entitiesWithinRadius});
 
                                 // DEBUG
-                                console.table(entitiesWithinRadius.map((entity) => {
-                                    return {
-                                        name: entity.name,
-                                        x: entity.x,
-                                        y: entity.y,
-                                        weaponRotation: (entity as Player).weapon.rotation,
-                                        // rotation: entity.rotation,
-                                        // rotationSpeed: entity.rotationSpeed,
-                                        // deltaTime
-                                    }
-                                }))
+                                // console.table(entitiesWithinRadius.map((entity) => {
+                                //     return {
+                                //         name: entity.name,
+                                //         x: entity.x,
+                                //         y: entity.y,
+                                //         weaponRotation: (entity as Player).weapon.rotation,
+                                //         // rotation: entity.rotation,
+                                //         // rotationSpeed: entity.rotationSpeed,
+                                //         // deltaTime
+                                //     }
+                                // }))
                             } catch (e) {
                                 console.error(`Error syncing player ${socketId}`)
                                 console.error(e)

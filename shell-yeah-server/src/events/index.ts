@@ -17,12 +17,13 @@ const events = {
 export default function registerEvents(socket: Socket, io: Server){
     for(const event in events){
         // console.log(`[${socket.id}] Registering event: ${event}`)
-        socket.on(event,(data) => {
-            console.log(`[${socket.id}] Event triggered: ${event}`)
+        socket.on(event,(data,callback) => {
+            // console.log(`[${socket.id}] Event triggered: ${event}`)
             const eventHandler = events[event]
             eventHandler({
                 socket,
-                data
+                data,
+                callback
             })
         })
     }
