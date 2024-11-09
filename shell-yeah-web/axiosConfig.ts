@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { BASE_URL } from './contants';
 
 const api = axios.create({
-    baseURL: 'http://localhost:3000/api/v1',
+    baseURL: BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -9,7 +10,7 @@ const api = axios.create({
 });
 
 export const unauthorizedApi = axios.create({
-    baseURL: 'http://localhost:3000/api/v1',
+    baseURL: BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
