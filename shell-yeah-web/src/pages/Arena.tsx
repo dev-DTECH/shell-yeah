@@ -12,6 +12,7 @@ import {useAccessToken, useUser} from "../context/AuthContext.tsx";
 import Auth from "../components/Auth.tsx";
 import GameCanvas from "../components/GameCanvas.tsx";
 import {io, Socket} from "socket.io-client";
+import constants from "../../constants.ts";
 
 function Arena() {
     const params = useParams()
@@ -38,7 +39,7 @@ function Arena() {
     useEffect(() => {
 
         if(!accessToken) return
-        const socket = io("localhost:3000", {
+        const socket = io(constants.SOCKET_BASE_URL, {
             transports: ["websocket", "polling"], // or [ "websocket", "polling" ] (the order matters)
             auth: {
                 token: accessToken
