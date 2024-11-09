@@ -5,6 +5,7 @@ import {Socket} from "socket.io-client";
 import Stats from './Stats';
 import Controller from '../Controller';
 import Box from "@mui/material/Box";
+import constants from "../../constants.ts";
 
 type Entity = {
     id: string;
@@ -25,7 +26,7 @@ type SyncPacket = {
     entities: Entity[]
 }
 
-const textureBaseUrl = "http://localhost:3000/assets/map/tiles"
+const textureBaseUrl = `${constants.ASSETS_URL}/map/tiles`
 const tileSize = 160; // or whatever your tile size is
 const tileImageMap: Record<number, string> = {
     0: "tile_0001.png",
@@ -145,7 +146,7 @@ export default function GameCanvas({socket, map}: { socket: Socket, map: Record<
 
     async function startGame() {
         const app = new Application();
-        await Assets.load(["http://localhost:3000/assets/tank/churchill/turret.png", "http://localhost:3000/assets/tank/churchill/hull.png"])
+        // await Assets.load(["http://localhost:3000/assets/tank/churchill/turret.png", "http://localhost:3000/assets/tank/churchill/hull.png"])
         const canvasContainer = document.querySelector("#game-canvas") as HTMLElement;
         if (!canvasContainer) return app;
         await app.init({
@@ -212,7 +213,7 @@ export default function GameCanvas({socket, map}: { socket: Socket, map: Record<
                         y: me.y - entity.y + app.canvas.height / 2,
                     };
                 }
-                const texture = await Assets.load(`http://localhost:3000/assets/tank/${entity.texture}/hull.png`);
+                const texture = await Assets.load(`${constants.ASSETS_URL}/tank/${entity.texture}/hull.png`);
                 const entitySprint = new Sprite(texture);
                 entitySprint.anchor.set(0.5);
                 entitySprint.x = updatedEntity.x;
@@ -223,7 +224,7 @@ export default function GameCanvas({socket, map}: { socket: Socket, map: Record<
 
                 // Render weapon
                 if (entity.weapon) {
-                    const weaponTexture = await Assets.load(`http://localhost:3000/assets/tank/${entity.weapon.texture}/turret.png`);
+                    const weaponTexture = await Assets.load(`${constants.ASSETS_URL}/tank/${entity.weapon.texture}/turret.png`);
                     // const weaponSprite = new SpriteWrapper({
                     //     texturePath: `http://localhost:3000/assets/tank/${entity.weapon.texture}/turret.png`,
                     //     x: updatedEntity.x,
