@@ -11,7 +11,7 @@ type user = {
     fullName?: string
 }
 
-type SetUserParams = user & { accessToken?: string }
+type SetUserParams = (user & { accessToken?: string }) | undefined
 
 const AuthUserContext = createContext<user | undefined>(undefined)
 const AuthAccessTokenContext = createContext<string | undefined>(undefined)

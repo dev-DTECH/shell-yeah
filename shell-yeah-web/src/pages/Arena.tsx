@@ -46,7 +46,7 @@ function Arena() {
         })
         console.log("socket connected")
 
-        socket.emit("join_arena", {arenaId}, (data) => {
+        socket.emit("join_arena", {arenaId}, (data: {map: Record<string,number>}) => {
             console.log("join_arena", data)
             setMap(data.map)
 

@@ -4,21 +4,21 @@ config()
 
 
 import express from 'express';
-import userRouter from "./route/user.js";
-import healthCheck from "./controller/healthCheck.js";
+import userRouter from "./src/route/user.js";
+import healthCheck from "./src/controller/healthCheck.js";
 import cookieParser from "cookie-parser";
 import * as os from "os";
 import http from "node:http";
 import {Server} from "socket.io";
-import tankRouter from "./route/tank.js";
+import tankRouter from "./src/route/tank.js";
 import * as path from "path";
-import onPlayerJoin from "./events/onPlayerJoin";
-import onDisconnect from "./events/onDisconnect";
-import registerEvents from "./events";
-import gameloop from "./service/gameloop";
-import {createArena} from "./service/arena";
-import redisClient from "./config/redis";
-import authorizeSocketToken from "./middleware/authorizeSocketToken";
+import onPlayerJoin from "./src/events/onPlayerJoin";
+import onDisconnect from "./src/events/onDisconnect";
+import registerEvents from "./src/events";
+import gameloop from "./src/service/gameloop";
+import {createArena} from "./src/service/arena";
+import redisClient from "./src/config/redis";
+import authorizeSocketToken from "./src/middleware/authorizeSocketToken";
 
 const sockets = {}
 
@@ -53,6 +53,7 @@ app.use(BASE_URL, (req, res) => {
 });
 
 app.use(`/assets`, express.static(path.join(__dirname, '../assets')))
+app.use(`/`, express.static(path.join(__dirname, '../public')))
 
 // Socket
 io.use(authorizeSocketToken)

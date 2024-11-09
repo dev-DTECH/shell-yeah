@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import database from "../database.ts";
+import database from "../database";
 
 export function generateAccessToken(payload) {
     return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '15m'})

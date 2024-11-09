@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.ts --ignore *.json"
+    "dev": "nodemon index.ts --ignore *.json",
+    "build": "tsc --build",
+    "start": "node dist/index.js"
   },
   "author": "",
   "license": "ISC",

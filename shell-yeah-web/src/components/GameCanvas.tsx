@@ -27,44 +27,80 @@ type SyncPacket = {
 
 const textureBaseUrl = "http://localhost:3000/assets/map/tiles"
 const tileSize = 160; // or whatever your tile size is
-const tileTextures: Record<number, Texture> = {
-    0: await Assets.load(`${textureBaseUrl}/tile_0001.png`),
-    1: await Assets.load(`${textureBaseUrl}/tile_0020.png`),
-    2: await Assets.load(`${textureBaseUrl}/tile_0056.png`),
-    3: await Assets.load(`${textureBaseUrl}/tile_0054.png`),
-    4: await Assets.load(`${textureBaseUrl}/tile_0018.png`),
+const tileImageMap: Record<number, string> = {
+    0: "tile_0001.png",
+    1: "tile_0020.png",
+    2: "tile_0056.png",
+    3: "tile_0054.png",
+    4: "tile_0018.png",
 
-    5: await Assets.load(`${textureBaseUrl}/tile_0093.png`),
-    6: await Assets.load(`${textureBaseUrl}/tile_0090.png`),
-    7: await Assets.load(`${textureBaseUrl}/tile_0091.png`),
-    8: await Assets.load(`${textureBaseUrl}/tile_0092.png`),
+    5: "tile_0093.png",
+    6: "tile_0090.png",
+    7: "tile_0091.png",
+    8: "tile_0092.png",
 
-    9: await Assets.load(`${textureBaseUrl}/tile_0038.png`),
-    10: await Assets.load(`${textureBaseUrl}/tile_0055.png`),
-    11: await Assets.load(`${textureBaseUrl}/tile_0036.png`),
-    12: await Assets.load(`${textureBaseUrl}/tile_0019.png`),
+    9: "tile_0038.png",
+    10: "tile_0055.png",
+    11: "tile_0036.png",
+    12: "tile_0019.png",
 
-    13: await Assets.load(`${textureBaseUrl}/tile_0130.png`),
-    14: await Assets.load(`${textureBaseUrl}/tile_0166.png`),
-    15: await Assets.load(`${textureBaseUrl}/tile_0110.png`),
-    16: await Assets.load(`${textureBaseUrl}/tile_0144.png`),
-    17: await Assets.load(`${textureBaseUrl}/tile_0129.png`),
-    18: await Assets.load(`${textureBaseUrl}/tile_0165.png`),
-    19: await Assets.load(`${textureBaseUrl}/tile_0163.png`),
-    20: await Assets.load(`${textureBaseUrl}/tile_0127.png`),
-    21: await Assets.load(`${textureBaseUrl}/tile_0130.png`),
-    22: await Assets.load(`${textureBaseUrl}/tile_0166.png`),
-    23: await Assets.load(`${textureBaseUrl}/tile_0130.png`),
-    24: await Assets.load(`${textureBaseUrl}/tile_0166.png`),
+    13: "tile_0130.png",
+    14: "tile_0166.png",
+    15: "tile_0110.png",
+    16: "tile_0144.png",
+    17: "tile_0129.png",
+    18: "tile_0165.png",
+    19: "tile_0163.png",
+    20: "tile_0127.png",
+    21: "tile_0130.png",
+    22: "tile_0166.png",
+    23: "tile_0130.png",
+    24: "tile_0166.png",
     // add other textures as needed
-};
-console.log(Object.keys(tileTextures).length)
+}
+// const tileTextures: Record<number, Texture> = {
+//     0: await Assets.load(`${textureBaseUrl}/tile_0001.png`),
+//     1: await Assets.load(`${textureBaseUrl}/tile_0020.png`),
+//     2: await Assets.load(`${textureBaseUrl}/tile_0056.png`),
+//     3: await Assets.load(`${textureBaseUrl}/tile_0054.png`),
+//     4: await Assets.load(`${textureBaseUrl}/tile_0018.png`),
+//
+//     5: await Assets.load(`${textureBaseUrl}/tile_0093.png`),
+//     6: await Assets.load(`${textureBaseUrl}/tile_0090.png`),
+//     7: await Assets.load(`${textureBaseUrl}/tile_0091.png`),
+//     8: await Assets.load(`${textureBaseUrl}/tile_0092.png`),
+//
+//     9: await Assets.load(`${textureBaseUrl}/tile_0038.png`),
+//     10: await Assets.load(`${textureBaseUrl}/tile_0055.png`),
+//     11: await Assets.load(`${textureBaseUrl}/tile_0036.png`),
+//     12: await Assets.load(`${textureBaseUrl}/tile_0019.png`),
+//
+//     13: await Assets.load(`${textureBaseUrl}/tile_0130.png`),
+//     14: await Assets.load(`${textureBaseUrl}/tile_0166.png`),
+//     15: await Assets.load(`${textureBaseUrl}/tile_0110.png`),
+//     16: await Assets.load(`${textureBaseUrl}/tile_0144.png`),
+//     17: await Assets.load(`${textureBaseUrl}/tile_0129.png`),
+//     18: await Assets.load(`${textureBaseUrl}/tile_0165.png`),
+//     19: await Assets.load(`${textureBaseUrl}/tile_0163.png`),
+//     20: await Assets.load(`${textureBaseUrl}/tile_0127.png`),
+//     21: await Assets.load(`${textureBaseUrl}/tile_0130.png`),
+//     22: await Assets.load(`${textureBaseUrl}/tile_0166.png`),
+//     23: await Assets.load(`${textureBaseUrl}/tile_0130.png`),
+//     24: await Assets.load(`${textureBaseUrl}/tile_0166.png`),
+//     // add other textures as needed
+// };
 
-function renderMap(position: { x: number, y: number }, tileMap: Record<string, number>) {
+async function renderMap(position: { x: number, y: number }, tileMap: Record<string, number>) {
     const worldContainer = new Container({
         // this will make moving this container GPU powered
         isRenderGroup: true,
     });
+    const tileTextures: Record<number, Texture> = {}
+    // promise.all
+    for (const key in tileImageMap) {
+        tileTextures[Number(key)] = await Assets.load(`${textureBaseUrl}/${tileImageMap[key]}`)
+    }
+
     for (const key in tileMap) {
         // console.log()
         const [x, y] = key.split(',').map(Number);
@@ -118,7 +154,7 @@ export default function GameCanvas({socket, map}: { socket: Socket, map: Record<
         });
         canvasContainer?.appendChild(app.canvas);
         let me: Entity | undefined
-        const mapContainer = renderMap({
+        const mapContainer = await renderMap({
             x: 0,
             y: 0,
         }, map)
