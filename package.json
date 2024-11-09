@@ -11,7 +11,7 @@
     "build:server": "cd shell-yeah-server && npm run build",
     "dev:client": "cd ./shell-yeah-web && npm run dev",
     "dev:server": "cd ./shell-yeah-server && npm run dev",
-    "scripts.install": "./build.sh"
+    "install": "./build.sh"
   },
   "author": "",
   "license": "ISC"
