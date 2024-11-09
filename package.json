@@ -6,12 +6,11 @@
   "scripts": {
     "build": "npm run build:client && npm run build:server",
     "start": "cd ./shell-yeah-server && npm start",
-    "postinstall": "cd shell-yeah-web && npm install && cd ../shell-yeah-server && npm install",
+    "postinstall": "cd shell-yeah-web && npm install && cd ../shell-yeah-server && npm install && cd .. && npm run build",
     "build:client": "cd shell-yeah-web && npm run build",
     "build:server": "cd shell-yeah-server && npm run build",
     "dev:client": "cd ./shell-yeah-web && npm run dev",
-    "dev:server": "cd ./shell-yeah-server && npm run dev",
-    "install": "npm i && npm run build"
+    "dev:server": "cd ./shell-yeah-server && npm run dev"
   },
   "author": "",
   "license": "ISC"
