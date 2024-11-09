@@ -7,7 +7,7 @@
     },
     "player": {
         "speed": 0.1,
-        "rotationSpeed": 0.01,
+        "rotationSpeed": 0.001,
         "viewDistance": 2000
     },
     "controls": {

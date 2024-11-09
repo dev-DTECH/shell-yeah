@@ -52,8 +52,8 @@ app.use(BASE_URL, (req, res) => {
     res.status(200).json({message: "Shell Yeah - API Gateway"})
 });
 
-app.use(`/assets`, express.static(path.join(__dirname, '../assets')))
-app.use(`/`, express.static(path.join(__dirname, '../public')))
+app.use(`/assets`, express.static('assets'))
+app.use(`/`, express.static('public'))
 
 // Socket
 io.use(authorizeSocketToken)
