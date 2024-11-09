@@ -9,6 +9,8 @@ import entity from "../model/Entity";
 // }
 
 export async function getEntitiesWithinRadius(arenaId: string, x: number, y: number, radius: number): Promise<Entity[]> {
+    const time = new Date().getTime()
+    console.time(`getEntitiesWithinRadius-${time}`);
     const geographicCoordinates = cartesianToGeographic(x, y);
     const nearbyEntityKeys = await redisClient.geoSearch(`arena:${arenaId}`,
         geographicCoordinates,
@@ -17,12 +19,14 @@ export async function getEntitiesWithinRadius(arenaId: string, x: number, y: num
             unit: 'm',
         });
 
-    return await Promise.all(
+    const entities = await Promise.all(
         nearbyEntityKeys.map(async (entityKey) => {
             const entityId = entityKey.split(":")[1];
             return await getEntityById(entityId);
         })
     );
+    console.timeEnd(`getEntitiesWithinRadius-${time}`);
+    return entities;
 }
 
 export async function getEntityById(id: string): Promise<Entity> {
