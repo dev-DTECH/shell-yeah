@@ -14,5 +14,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - run: cd ./shell-yeah-server/
     - name: Build the Docker image
       run: docker build . --file ./shell-yeah-server/dockerfile --tag shell-yeah:$(date +%s)
