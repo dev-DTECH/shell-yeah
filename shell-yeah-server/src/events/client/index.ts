@@ -1,9 +1,9 @@
 import {Server, Socket} from "socket.io";
-import onDisconnect from "./onDisconnect";
-import onPlayerJoin from "./onPlayerJoin";
-import onPing from "./ping";
+// import onDisconnect from "./onDisconnect";
+// import onPlayerJoin from "./onPlayerJoin";
+// import onPing from "./ping";
 import onJoinArena from "./onJoinArena";
-import onMove from "./onMove";
+import onMove from "./onVelocityChange";
 
 const events = {
     // "disconnect": onDisconnect,
@@ -16,9 +16,7 @@ const events = {
 
 export default function registerEvents(socket: Socket, io: Server){
     for(const event in events){
-        // console.log(`[${socket.id}] Registering event: ${event}`)
         socket.on(event,(data,callback) => {
-            // console.log(`[${socket.id}] Event triggered: ${event}`)
             const eventHandler = events[event]
             eventHandler({
                 socket,

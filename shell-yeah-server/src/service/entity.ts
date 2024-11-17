@@ -9,7 +9,7 @@ import entity from "../model/Entity";
 // }
 
 export async function getEntitiesWithinRadius(arenaId: string, x: number, y: number, radius: number): Promise<Entity[]> {
-    // const time = new Date().getTime()
+    const time = new Date().getTime()
     // console.time(`getEntitiesWithinRadius-${time}`);
     const geographicCoordinates = cartesianToGeographic(x, y);
     const nearbyEntityKeys = await redisClient.geoSearch(`arena:${arenaId}`,

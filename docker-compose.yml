@@ -1,0 +1,17 @@
+services:
+  redis:
+    image: redis:latest
+    restart: always
+    command: redis-server --loglevel warning
+    volumes:
+      - cache:/data
+  game-server:
+    # image: devdt/shell-yeah
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+volumes:
+  cache:
+    driver: local

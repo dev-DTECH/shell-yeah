@@ -12,13 +12,14 @@ import http from "node:http";
 import {Server} from "socket.io";
 import tankRouter from "./src/route/tank.js";
 import * as path from "path";
-import onPlayerJoin from "./src/events/onPlayerJoin";
-import onDisconnect from "./src/events/onDisconnect";
-import registerEvents from "./src/events";
+import onPlayerJoin from "./src/events/client/onPlayerJoin";
+import onDisconnect from "./src/events/client/onDisconnect";
+import registerEvents from "./src/events/client/index";
 import gameloop from "./src/service/gameloop";
 import {createArena} from "./src/service/arena";
 import redisClient from "./src/config/redis";
 import authorizeSocketToken from "./src/middleware/authorizeSocketToken";
+import ServerEvent from "./src/events/server";
 
 const sockets = {}
 
@@ -71,12 +72,15 @@ io.on('connection', (socket) => {
     })
 });
 
+// Server Events
+// const serverEvents = new ServerEvent()
+
 // Game Loop
 gameloop(io)
 
-server.listen(3000, async () => {
+const PORT = process.env.PORT || 3000
+server.listen(PORT, async () => {
     await redisClient.flushDb()
     await createArena("public")
     console.log(`[Shell Yeah - API Gateway] Listening on port 3000 🚀 -> http://localhost:3000${BASE_URL}`);
 });
-

@@ -1,8 +1,7 @@
-import {deleteKey, getValue} from "../service/redis";
 import {Socket} from "socket.io";
-import {deleteEntity, getEntityById} from "../service/entity";
-import {entities} from "../data/entities";
-import {arenas} from "../data/arenas";
+import {deleteEntity, getEntityById} from "../../service/entity";
+import {entities} from "../../data/entities";
+import {arenas} from "../../data/arenas";
 
 export default async function onDisconnect(socket: Socket) {
     if (!arenas.has(socket.id)) return

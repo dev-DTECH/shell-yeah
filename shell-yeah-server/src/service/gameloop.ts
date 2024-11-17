@@ -4,6 +4,7 @@ import {getEntitiesWithinRadius, updateEntity} from "./entity";
 import {getAllArenaIds} from "./arena";
 import Player from "../model/Player";
 import {entities} from "../data/entities";
+import ServerEvent from "../events/server";
 
 let startTime = performance.now();
 let tps = 0
@@ -59,7 +60,8 @@ export default function gameloop(io: Server) {
                                 // console.log(`Syncing player ${socketId}`)
                                 const clientPlayer = entities[socketId] as Player
                                 // move player
-                                clientPlayer.move(deltaTime)
+                                // clientPlayer.move(deltaTime)
+                                ServerEvent.emit("move", clientPlayer, deltaTime)
 
                                 await updateEntity(clientPlayer, arenaId)
                                 const entitiesWithinRadius = await getEntitiesWithinRadius(arenaId, clientPlayer.x, clientPlayer.y, config.get('player.viewDistance'))

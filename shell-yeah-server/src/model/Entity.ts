@@ -1,3 +1,6 @@
+import serverEvents from "../events/server";
+import { updateEntity } from "../service/entity";
+
 class Entity {
     public id: string;
     public name: string;
@@ -16,6 +19,7 @@ class Entity {
         rotation: number,
         texture: string
     }
+    public arenaId: string;
 
     constructor(id: string | Entity) {
         if (typeof id === "string") {
@@ -31,6 +35,7 @@ class Entity {
             this.rotationSpeed = 0;
             this.texture = "";
             this.weapon = undefined
+            this.arenaId = "";
             return;
         }
         this.id = id.id;
@@ -42,6 +47,7 @@ class Entity {
         this.rotationSpeed = id.rotationSpeed;
         this.texture = id.texture;
         this.weapon = id.weapon;
+        this.arenaId = id.arenaId;
     }
 
     move(deltaTime: number) {
@@ -54,7 +60,7 @@ class Entity {
         this.y += this.velocity.y * deltaTime * Math.cos(this.rotation)
 
         this.rotation += this.rotationSpeed * deltaTime
-
+        updateEntity(this, this.arenaId)
         // // -50 to 50
         // if (this.x < -50) this.x = -50
         // if (this.y < -50) this.y = -50

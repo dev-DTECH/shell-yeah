@@ -1,5 +1,5 @@
-import Player from "../model/Player";
-import {createEntity} from "../service/entity";
+import Player from "../../model/Player";
+import {createEntity} from "../../service/entity";
 import {Socket} from "socket.io";
 
 export default async function onPlayerJoin({socket, arenaId, join}: {

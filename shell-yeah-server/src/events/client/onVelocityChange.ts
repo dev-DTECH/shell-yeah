@@ -1,14 +1,15 @@
 import {Socket} from "socket.io";
-import {updateEntity} from "../service/entity";
-import Player from "../model/Player";
+import {updateEntity} from "../../service/entity";
+import Player from "../../model/Player";
 import config from "config";
-import {entities} from "../data/entities";
+import {entities} from "../../data/entities";
 
 export default async function ({socket, data}: {
     socket: Socket,
     data: { key: Record<string, boolean | number> }
 }) {
     const clientPlayer = entities[socket.id] as Player
+    if(!clientPlayer) return
     // console.log(data.key)
 
     if (data.key.up || data.key.down)

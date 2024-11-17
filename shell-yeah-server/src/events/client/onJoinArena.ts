@@ -1,10 +1,12 @@
 import {Socket} from "socket.io";
-import {createEntity} from "../service/entity";
-import {entities} from "../data/entities";
-import {arenaExists, createArena, getAllArenaIds, getArenaMap} from "../service/arena";
-import {arenas} from "../data/arenas";
-import database from "../database";
-import Player from "../model/Player";
+import {createEntity} from "../../service/entity";
+import {entities} from "../../data/entities";
+import {arenaExists, createArena, getAllArenaIds, getArenaMap} from "../../service/arena";
+import {arenas} from "../../data/arenas";
+import database from "../../database";
+import Player from "../../model/Player";
+
+const pause = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default async function onJoinArena({socket, data, callback}: {
     socket: Socket & {
@@ -32,8 +34,11 @@ export default async function onJoinArena({socket, data, callback}: {
 
     const player = await createEntity(socket.id, arenaId)
 
+
     player.name = socket.user.username;
     entities[socket.id] = player;
+
+
     const [resultSet] = await database.query(`SELECT texture, weapon_texture
                                               FROM user
                                               WHERE id = ?`, [socket.user.id]);

@@ -1,5 +1,5 @@
 {
-    "tps": 20,
+    "tps": 100,
     "map_size": 10,
     "debug": {
         "showTPS": false
