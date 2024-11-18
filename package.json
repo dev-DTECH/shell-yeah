@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npm run build:client && npm run build:server",
     "start": "npm run start --workspaces",
-    "start:docker": "docker compose up ",
+    "start:docker": "docker compose up",
     "build:client": "npm run build --workspace=shell-yeah-web",
     "build:server": "npm run build --workspace=shell-yeah-server",
     "dev:client": "npm run dev --workspace=shell-yeah-web",

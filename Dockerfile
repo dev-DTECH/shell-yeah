@@ -1,4 +1,4 @@
-FROM node:20
+FROM node:18
 
 WORKDIR /app
 
@@ -9,8 +9,7 @@ COPY shell-yeah-server/package.json ./shell-yeah-server/package.json
 RUN npm install --verbose
 
 # Copy source code
-COPY ./shell-yeah-web ./shell-yeah-web
-COPY ./shell-yeah-server ./shell-yeah-server
+COPY . .
 
 # Build
 RUN npm run build

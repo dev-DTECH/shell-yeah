@@ -1,2 +1,6 @@
-node_modules
-package-lock.json
+*/node_modules
+
+*/package-lock.json
+tank-br-client
+tank-br-client-old
+tank-br-server
