@@ -50,7 +50,7 @@ class Entity {
         this.arenaId = id.arenaId;
     }
 
-    move(deltaTime: number) {
+    async move(deltaTime: number) {
         // this.x += this.velocity.x * deltaTime;
         // this.y += this.velocity.y * deltaTime;
         if (!this.velocity.y && !this.rotationSpeed) return;
@@ -60,7 +60,7 @@ class Entity {
         this.y += this.velocity.y * deltaTime * Math.cos(this.rotation)
 
         this.rotation += this.rotationSpeed * deltaTime
-        updateEntity(this, this.arenaId)
+        await updateEntity(this, this.arenaId)
         // // -50 to 50
         // if (this.x < -50) this.x = -50
         // if (this.y < -50) this.y = -50

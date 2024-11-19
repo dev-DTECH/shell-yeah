@@ -1,5 +1,5 @@
 import Player from "../../model/Player";
 
-export default function onMove(player: Player, deltaTime: number){
-    player.move(deltaTime)
+export default async function onMove(player: Player, deltaTime: number){
+    await player.move(deltaTime)
 }

@@ -1,5 +1,4 @@
 import Entity from "./Entity";
-import config from "config/lib/config";
 
 class Player extends Entity {
     // public key: Record<string, boolean>

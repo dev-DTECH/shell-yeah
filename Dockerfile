@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json .
 COPY shell-yeah-web/package.json ./shell-yeah-web/package.json
 COPY shell-yeah-server/package.json ./shell-yeah-server/package.json
-RUN npm install --verbose
+RUN npm install
 
 # Copy source code
 COPY . .

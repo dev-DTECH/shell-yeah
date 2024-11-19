@@ -63,7 +63,6 @@ export default function gameloop(io: Server) {
                                 // clientPlayer.move(deltaTime)
                                 ServerEvent.emit("move", clientPlayer, deltaTime)
 
-                                await updateEntity(clientPlayer, arenaId)
                                 const entitiesWithinRadius = await getEntitiesWithinRadius(arenaId, clientPlayer.x, clientPlayer.y, config.get('player.viewDistance'))
                                 io.to(socketId).emit("sync", {entities: entitiesWithinRadius});
 
