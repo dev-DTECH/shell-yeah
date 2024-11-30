@@ -20,6 +20,7 @@ import {createArena} from "./src/service/arena";
 import redisClient from "./src/config/redis";
 import authorizeSocketToken from "./src/middleware/authorizeSocketToken";
 import ServerEvent from "./src/events/server";
+import cors from "cors";
 
 const sockets = {}
 
@@ -28,14 +29,22 @@ const server = http.createServer(app);
 
 const io = new Server(server);
 
+io.engine.on("connection_error", (err) => {
+    console.log(err.req);      // the request object
+    console.log(err.code);     // the error code, for example 1
+    console.log(err.message);  // the error message, for example "Session ID unknown"
+    console.log(err.context);  // some additional error context
+  });
+
+app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
 
-const BASE_URL = "/api/v1"
+const BASE_URL = "/"
 
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Credentials', 'true');
-    res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+    res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     next();
 });
@@ -49,12 +58,12 @@ app.use(`${BASE_URL}/*`, (req, res) => {
     res.status(404).json({message: "Not Found"})
 });
 
-app.use(BASE_URL, (req, res) => {
-    res.status(200).json({message: "Shell Yeah - API Gateway"})
-});
+// app.use(BASE_URL, (req, res) => {
+//     res.status(200).json({message: "Shell Yeah - API Gateway"})
+// });
 
 app.use(`/assets`, express.static('assets'))
-app.use(`/`, express.static('public'))
+// app.use(`/`, express.static('public'))
 
 // Socket
 io.use(authorizeSocketToken)
@@ -65,6 +74,7 @@ io.on('connection', (socket) => {
     socket.on("ping", (callback) => {
         callback();
     });
+    socket.emit("test", "test")
     socket.on('disconnect', async () => {
         delete sockets[socket.id]
         await onDisconnect(socket)
@@ -72,15 +82,18 @@ io.on('connection', (socket) => {
     })
 });
 
+// app.use(BASE_URL, (req, res) => {
+//     res.status(200).json({message: "Shell Yeah - API Gateway"})
+// });
 // Server Events
 // const serverEvents = new ServerEvent()
 
 // Game Loop
 gameloop(io)
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3100
 server.listen(PORT, async () => {
     await redisClient.flushDb()
     await createArena("public")
-    console.log(`[Shell Yeah - API Gateway] Listening on port 3000 🚀 -> http://localhost:3000${BASE_URL}`);
+    console.log(`[game-ws] Server Started 🚀 -> http://localhost:${PORT}${BASE_URL}`);
 });

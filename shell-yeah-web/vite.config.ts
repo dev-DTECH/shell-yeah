@@ -6,5 +6,10 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: '../shell-yeah-server/public'
+  },
+  server: {
+    hmr: {
+      clientPort: 5173,
+    },
   }
 })

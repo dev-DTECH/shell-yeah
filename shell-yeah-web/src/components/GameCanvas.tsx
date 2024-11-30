@@ -169,6 +169,7 @@ export default function GameCanvas({socket, map}: { socket: Socket, map: Record<
         let startTime = performance.now();
         let tps = 0
         socket.on("sync", (data: SyncPacket) => {
+            // console.log(data)
             if (performance.now() - startTime > 1000) {
                 // console.log("TPS: " + tps);
                 setTPS(tps);
