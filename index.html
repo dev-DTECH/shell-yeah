@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Client</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+
+<body>
+    <h1>Socket.IO Client</h1>
+    <div>
+        <input type="text" id="messageInput" placeholder="Type your message">
+        <button onclick="sendMessage()">Send Message</button>
+    </div>
+    <div id="messages">
+        <h3>Messages:</h3>
+        <ul id="messagesList"></ul>
+    </div>
+
+    <script>
+        // Connect to the Socket.IO server
+
+        const socket = io("http://localhost", {
+            path: "/game-ws",
+            transports: ["websocket", "polling"], // or [ "websocket", "polling" ] (the order matters)
+            // auth: {
+            //     token: accessToken
+            // }
+        });
+        socket.on("connect_error", (err) => {
+            // the reason of the error, for example "xhr poll error"
+            console.log(err.message);
+
+            // some additional description, for example the status code of the initial HTTP response
+            console.log(err.description);
+
+            // some additional context, for example the XMLHttpRequest object
+            console.log(err.context);
+        });
+
+        // Listen for the "connect" event
+        socket.on('connect', () => {
+            // socket.emit("join_arena", (data) => {
+            //   console.log("join_arena", data)
+            //   console.log(data)
+
+            // })
+            console.log('Connected to server!');
+        });
+        socket.on('error', (e) => {
+            console.log(e)
+        })
+
+        // Listen for a custom event from the server
+        socket.on('message', (data) => {
+            console.log('Message received:', data);
+            const messagesList = document.getElementById('messagesList');
+            const newMessage = document.createElement('li');
+            newMessage.textContent = data;
+            messagesList.appendChild(newMessage);
+        });
+        socket.on('sync', (data) => {
+            console.log('Message received:', data);
+            const messagesList = document.getElementById('messagesList');
+            const newMessage = document.createElement('li');
+            newMessage.textContent = data;
+            messagesList.appendChild(newMessage);
+        });
+
+        // Send a message to the server
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value;
+
+            if (message.trim() !== '') {
+                socket.emit('message', message); // Emit the "message" event
+                input.value = ''; // Clear the input field
+            }
+        }
+    </script>
+</body>
+
+</html>
