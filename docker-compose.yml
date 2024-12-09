@@ -6,13 +6,13 @@ services:
     volumes:
       - cache:/data
   web-ui:
-    image: devdt/shell-yeah-web-ui
+    image: devdt/shell-yeah-web-ui-service
     deploy:
       mode: replicated
       replicas: 2
 
   game-ws:
-    image: devdt/shell-yeah-game-ws
+    image: devdt/shell-yeah-game-service
     deploy:
       mode: replicated
       replicas: 2

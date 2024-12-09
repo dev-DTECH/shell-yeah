@@ -7,3 +7,5 @@ package-lock.json
 *.config.json
 *.config.js
 !gateway.config.json
+
+*/dist

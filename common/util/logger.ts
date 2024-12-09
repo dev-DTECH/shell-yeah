@@ -1,5 +1,5 @@
 // import pino from "pino";
-const pino = require("pino");
+import pino from "pino";
 
 const transport = pino.transport({
   targets: [
@@ -21,4 +21,4 @@ const logger = pino(
   // pino.destination("./logs/api-gateway.log")
 );
 
-module.exports = logger;
+export default logger;

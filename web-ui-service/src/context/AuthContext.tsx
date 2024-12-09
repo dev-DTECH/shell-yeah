@@ -1,7 +1,7 @@
 import React, {createContext, useContext, useLayoutEffect, useState} from "react";
 import {useOpenSnackbar} from "./SnackbarContext.tsx";
 import {jwtDecode} from "jwt-decode";
-import api, {unauthorizedApi} from "../../axiosConfig.ts";
+import api, {userService} from "../../axiosConfig.ts";
 
 type user = {
     exp: number;
@@ -49,7 +49,7 @@ export default function AuthContextProvider({children}: { children: React.ReactN
 
 
     async function refreshToken() {
-        const res = await unauthorizedApi.post('/user/refreshToken')
+        const res = await userService.post('/user/refreshToken')
         const {newAccessToken} = res.data
         setAccessToken(newAccessToken)
 

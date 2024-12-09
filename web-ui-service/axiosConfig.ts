@@ -1,8 +1,8 @@
 import axios from 'axios';
-import contants from './constants';
+import constants from './constants';
 
 const api = axios.create({
-    baseURL: contants.BASE_URL,
+    baseURL: constants.BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -10,7 +10,15 @@ const api = axios.create({
 });
 
 export const unauthorizedApi = axios.create({
-    baseURL: contants.BASE_URL,
+    baseURL: constants.BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: true
+});
+
+export const userService = axios.create({
+    baseURL: `${constants.BASE_URL}/user-service`,
     headers: {
         'Content-Type': 'application/json',
     },

@@ -5,15 +5,14 @@ COPY ./common /common
 WORKDIR /common
 
 RUN npm install
-
-RUN ls -la /common && sleep 10
+RUN npm run build
 
 WORKDIR /app
 
-COPY ./shell-yeah-web/package.json .
+COPY ./web-ui-service/package.json .
 RUN npm install
 
-COPY ./shell-yeah-web .
+COPY ./web-ui-service .
 
 RUN npm run build
 
