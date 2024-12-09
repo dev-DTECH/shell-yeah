@@ -5,13 +5,19 @@ services:
     command: redis-server --loglevel warning
     volumes:
       - cache:/data
-  web-ui:
+
+  user-service:
+    image: devdt/user-service
+    deploy:
+      mode: replicated
+      replicas: 2
+  web-ui-service:
     image: devdt/shell-yeah-web-ui-service
     deploy:
       mode: replicated
       replicas: 2
 
-  game-ws:
+  game-service:
     image: devdt/shell-yeah-game-service
     deploy:
       mode: replicated
@@ -26,8 +32,9 @@ services:
     volumes:
       - ./docker/loadbalancer/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - web-ui
-      - game-ws
+      - web-ui-service
+      - user-service
+      - game-service
     ports:
       - "80:80"
 

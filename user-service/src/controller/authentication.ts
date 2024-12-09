@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { deleteRefreshToken, generateAccessToken, generateRefreshToken } from "../util/jwt";
 import { Request, Response } from "express";
-import { database } from "@shell-yeah/common";
+import { database, logger } from "@shell-yeah/common";
 
 export const login = async (req: Request, res: Response) => {
     if (!req.body.username || !req.body.password) {
@@ -12,6 +12,7 @@ export const login = async (req: Request, res: Response) => {
     const username = req.body.username;
     const password = req.body.password;
     const users = await database.query("SELECT * FROM user WHERE username = ? OR email = ?", [username, username])
+    logger.error(users[0])
     if (users.length == 0) {
         res.status(401).json({ error: "Invalid username or password" })
         return
