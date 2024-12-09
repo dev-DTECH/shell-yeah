@@ -27,7 +27,9 @@ const sockets = {}
 const app = express();
 const server = http.createServer(app);
 
-const io = new Server(server);
+const io = new Server(server,{
+    path: "/game-ws/"
+});
 
 io.engine.on("connection_error", (err) => {
     console.log(err.req);      // the request object
@@ -66,7 +68,7 @@ app.use(`/assets`, express.static('assets'))
 // app.use(`/`, express.static('public'))
 
 // Socket
-io.use(authorizeSocketToken)
+// io.use(authorizeSocketToken)
 io.on('connection', (socket) => {
     sockets[socket.id] = socket
     console.log(`Client connected: ${socket.id}`);
@@ -91,7 +93,7 @@ io.on('connection', (socket) => {
 // Game Loop
 gameloop(io)
 
-const PORT = process.env.PORT || 3100
+const PORT = process.env.PORT || 3000
 server.listen(PORT, async () => {
     await redisClient.flushDb()
     await createArena("public")

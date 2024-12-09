@@ -1,0 +1,19 @@
+{
+    "port": 3000,
+    "rateLimit": 1000,
+    "timeout": 100000,
+    "services": [
+        {
+            "name": "game-ws",
+            "route": "/game-ws",
+            "target": "http://localhost:3100/",
+            "authorize": false
+        },
+        {
+            "name": "ui",
+            "route": "/",
+            "target": "http://localhost:5173",
+            "authorize": false
+        }
+    ]
+}

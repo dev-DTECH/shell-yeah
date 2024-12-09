@@ -1,10 +1,14 @@
 {
   "name": "api-gateway",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.ts -e js,ts,json"
+    "dev": "nodemon index.ts -e js,ts,json",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "build:docker": "docker build -t devdt/shell-yeah-api-gateway . && docker push devdt/shell-yeah-api-gateway",
+    "docker:run": "docker run -p 3000:3000 devdt/shell-yeah-api-gateway"
   },
   "author": "",
   "license": "ISC",
@@ -33,6 +37,9 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "mysql2": "^3.11.4",
+    "pino": "^9.5.0",
+    "pino-http": "^10.3.0",
+    "pino-pretty": "^13.0.0",
     "socket.io": "^4.8.1"
   }
 }

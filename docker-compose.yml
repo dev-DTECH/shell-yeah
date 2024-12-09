@@ -5,13 +5,32 @@ services:
     command: redis-server --loglevel warning
     volumes:
       - cache:/data
-  game-server:
-    # image: devdt/shell-yeah
-    build: .
-    ports:
-      - "3000:3000"
+  web-ui:
+    image: devdt/shell-yeah-web-ui
+    deploy:
+      mode: replicated
+      replicas: 2
+
+  game-ws:
+    image: devdt/shell-yeah-game-ws
+    deploy:
+      mode: replicated
+      replicas: 2
+    volumes:
+      - ./.env:/app/.env
     depends_on:
       - redis
+
+  api-gateway:
+    image: nginx:latest
+    volumes:
+      - ./docker/loadbalancer/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web-ui
+      - game-ws
+    ports:
+      - "80:80"
+
 volumes:
   cache:
     driver: local

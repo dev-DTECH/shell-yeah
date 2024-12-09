@@ -3,17 +3,29 @@
   "version": "1.0.0",
   "description": "Scalable tank battle royale game powered by socket.io",
   "main": "index.js",
-  "workspaces": ["shell-yeah-web", "shell-yeah-server"],
+  "workspaces": [
+    "shell-yeah-web",
+    "shell-yeah-server",
+    "api-gateway"
+  ],
   "scripts": {
-    "build": "npm run build:client && npm run build:server",
-    "start": "npm run start --workspace=shell-yeah-server",
+    "build": "npm run build --workspaces",
+    "build:docker": "npm run build:docker --workspaces",
+    "start": "npm run start --workspaces",
     "start:docker": "docker compose up",
     "build:client": "npm run build --workspace=shell-yeah-web",
     "build:server": "npm run build --workspace=shell-yeah-server",
     "dev:client": "npm run dev --workspace=shell-yeah-web",
     "dev:server": "npm run dev --workspace=shell-yeah-server",
-    "docker:publish": "docker build -t devdt/shell-yeah:0.0.1 . && docker push devdt/shell-yeah:0.0.1"
+    "build:docker:web-ui": "docker build -t devdt/shell-yeah-web-ui -f shell-yeah-web/Dockerfile . && docker push devdt/shell-yeah-web-ui"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@shell-yeah/common": "file:common",
+    "pino": "^9.5.0",
+    "pino-http": "^10.3.0",
+    "pino-pretty": "^13.0.0",
+    "typescript": "^5.7.2"
+  }
 }

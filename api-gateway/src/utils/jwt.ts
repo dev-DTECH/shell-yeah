@@ -1,5 +1,9 @@
 import jwt from "jsonwebtoken";
 import database from "./database";
+import assert from "node:assert";
+
+assert(process.env.ACCESS_TOKEN_SECRET, "ACCESS_TOKEN_SECRET is required")
+assert(process.env.REFRESH_TOKEN_SECRET, "REFRESH_TOKEN_SECRET is required")
 
 export function generateAccessToken(payload: any) {
     return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET as string, {expiresIn: '15m'})

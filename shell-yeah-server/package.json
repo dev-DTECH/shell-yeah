@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.ts --ignore *.json",
-    "build": "tsc --build && copy .env dist/",
-    "start": "node dist/index.js"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "build:docker": "docker build -t devdt/shell-yeah-game-ws . && docker push devdt/shell-yeah-game-ws"
   },
   "author": "",
   "license": "ISC",
