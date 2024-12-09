@@ -18,7 +18,8 @@
     "dev:client": "npm run dev --workspace=shell-yeah-web",
     "dev:server": "npm run dev --workspace=shell-yeah-server",
     "build:docker:web-ui-service": "docker build -t devdt/shell-yeah-web-ui-service -f web-ui-service/Dockerfile . && docker push devdt/shell-yeah-web-ui-service",
-    "build:docker:game-service": "docker build -t devdt/shell-yeah-game-service -f game-service/Dockerfile . && docker push devdt/shell-yeah-game-service"
+    "build:docker:game-service": "docker build -t devdt/shell-yeah-game-service -f game-service/Dockerfile . && docker push devdt/shell-yeah-game-service",
+    "build:docker:user-service": "docker build -t devdt/user-service -f user-service/Dockerfile . && docker push devdt/user-service"
   },
   "author": "",
   "license": "ISC"
