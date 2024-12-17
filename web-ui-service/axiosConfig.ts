@@ -18,7 +18,7 @@ export const unauthorizedApi = axios.create({
 });
 
 export const userService = axios.create({
-    baseURL: `${constants.BASE_URL}/user-service`,
+    baseURL: `/user-service`,
     headers: {
         'Content-Type': 'application/json',
     },

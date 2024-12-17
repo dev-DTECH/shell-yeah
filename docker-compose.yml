@@ -10,12 +10,12 @@ services:
     image: devdt/user-service
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: 1
   web-ui-service:
     image: devdt/shell-yeah-web-ui-service
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: 1
 
   game-service:
     image: devdt/shell-yeah-game-service

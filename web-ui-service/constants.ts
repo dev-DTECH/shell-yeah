@@ -1,6 +1,6 @@
 const constants = {
-    BASE_URL: "/api",
-    SOCKET_BASE_URL: "/game-ws",
+    BASE_URL: "/",
+    SOCKET_BASE_URL: "/game-service",
     ASSETS_URL: "/assets",
 }
 export default constants

@@ -23,7 +23,7 @@
         // Connect to the Socket.IO server
 
         const socket = io("http://localhost", {
-            path: "/game-ws",
+            path: "/game-service/",
             transports: ["websocket", "polling"], // or [ "websocket", "polling" ] (the order matters)
             // auth: {
             //     token: accessToken

@@ -49,7 +49,7 @@ export default function AuthContextProvider({children}: { children: React.ReactN
 
 
     async function refreshToken() {
-        const res = await userService.post('/user/refreshToken')
+        const res = await userService.post('/user/refresh-token')
         const {newAccessToken} = res.data
         setAccessToken(newAccessToken)
 

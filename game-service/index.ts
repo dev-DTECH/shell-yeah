@@ -28,7 +28,7 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server,{
-    path: "/game-ws/"
+    path: "/game-service/"
 });
 
 io.engine.on("connection_error", (err) => {
@@ -51,6 +51,10 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use(`${BASE_URL}/`, (req, res, next) => {
+    return res.status(200).json({message: "Shell Yeah - game service"})
+})
+
 app.use(`${BASE_URL}/user`, userRouter)
 app.use(`${BASE_URL}/tank`, tankRouter)
 app.use(`${BASE_URL}/healthcheck`, healthCheck)
@@ -68,7 +72,7 @@ app.use(`/assets`, express.static('assets'))
 // app.use(`/`, express.static('public'))
 
 // Socket
-// io.use(authorizeSocketToken)
+io.use(authorizeSocketToken)
 io.on('connection', (socket) => {
     sockets[socket.id] = socket
     console.log(`Client connected: ${socket.id}`);
